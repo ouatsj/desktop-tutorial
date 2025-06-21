@@ -182,15 +182,18 @@ backend:
 
   - task: "Alert System"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented alert system that creates alerts 3 days before recharge expiration. Users can view pending alerts and dismiss them."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested alert system. Alerts are automatically created when recharges are created, with the alert date set to 3 days before expiration. Alerts can be retrieved and dismissed as expected. Dismissed alerts are properly excluded from the alerts listing."
 
   - task: "Dashboard Statistics API"
     implemented: true
