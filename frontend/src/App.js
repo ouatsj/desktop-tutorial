@@ -1053,6 +1053,8 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalType, setModalType] = useState('');
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  const [reportConfig, setReportConfig] = useState({ type: '', entityId: '', entityName: '' });
 
   const { user, logout } = useAuth();
 
@@ -1089,6 +1091,11 @@ const Dashboard = () => {
     setShowAddModal(true);
   };
 
+  const openReportModal = (type, entityId, entityName) => {
+    setReportConfig({ type, entityId, entityName });
+    setShowReportsModal(true);
+  };
+
   const getStatusBadge = (status) => {
     const statusStyles = {
       active: 'bg-green-100 text-green-800',
@@ -1100,11 +1107,21 @@ const Dashboard = () => {
 
   const getOperatorColor = (operator) => {
     const colors = {
-      Orange: 'text-orange-600',
-      Telecel: 'text-blue-600',
-      Moov: 'text-green-600'
+      'Orange': 'text-orange-600',
+      'Telecel': 'text-blue-600',
+      'Moov': 'text-green-600',
+      'Onatel Fibre': 'text-purple-600',
+      'Orange Fibre': 'text-orange-600',
+      'Telecel Fibre': 'text-blue-600'
     };
     return colors[operator] || 'text-gray-600';
+  };
+
+  const getOperatorIcon = (operator) => {
+    if (operator.includes('Fibre')) {
+      return '🌐';
+    }
+    return '📱';
   };
 
   if (loading) {
