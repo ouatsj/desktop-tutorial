@@ -1693,6 +1693,15 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Reports Modal */}
+      <ReportsModal
+        isOpen={showReportsModal}
+        onClose={() => setShowReportsModal(false)}
+        type={reportConfig.type}
+        entityId={reportConfig.entityId}
+        entityName={reportConfig.entityName}
+      />
     </div>
   );
 };
