@@ -496,7 +496,234 @@ async def dismiss_alert(alert_id: str, current_user: User = Depends(get_current_
     
     return {"message": "Alert dismissed"}
 
-# Dashboard routes
+# Reports and exports
+@api_router.get("/reports/gare/{gare_id}")
+async def get_gare_report(gare_id: str, current_user: User = Depends(get_current_user)):
+    await update_recharge_statuses()
+    
+    # Get gare info
+    gare = await db.gares.find_one({"id": gare_id})
+    if not gare:
+        raise HTTPException(status_code=404, detail="Gare not found")
+    
+    # Get agency and zone info
+    agency = await db.agencies.find_one({"id": gare["agency_id"]})
+    zone = await db.zones.find_one({"id": agency["zone_id"]}) if agency else None
+    
+    # Get all recharges for this gare
+    recharges = await db.recharges.find({"gare_id": gare_id}).sort("created_at", -1).to_list(1000)
+    
+    # Calculate statistics
+    total_recharges = len(recharges)
+    active_recharges = len([r for r in recharges if r["status"] == "active"])
+    expired_recharges = len([r for r in recharges if r["status"] == "expired"])
+    expiring_recharges = len([r for r in recharges if r["status"] == "expiring_soon"])
+    total_cost = sum([r["cost"] for r in recharges])
+    
+    # Group by operator
+    operator_stats = {}
+    for recharge in recharges:
+        op = recharge["operator"]
+        if op not in operator_stats:
+            operator_stats[op] = {"count": 0, "cost": 0, "active": 0}
+        operator_stats[op]["count"] += 1
+        operator_stats[op]["cost"] += recharge["cost"]
+        if recharge["status"] == "active":
+            operator_stats[op]["active"] += 1
+    
+    return {
+        "gare": gare,
+        "agency": agency,
+        "zone": zone,
+        "recharges": recharges,
+        "statistics": {
+            "total_recharges": total_recharges,
+            "active_recharges": active_recharges,
+            "expired_recharges": expired_recharges,
+            "expiring_recharges": expiring_recharges,
+            "total_cost": total_cost,
+            "operator_stats": operator_stats
+        },
+        "generated_at": datetime.utcnow()
+    }
+
+@api_router.get("/reports/agency/{agency_id}")
+async def get_agency_report(agency_id: str, current_user: User = Depends(get_current_user)):
+    await update_recharge_statuses()
+    
+    # Get agency info
+    agency = await db.agencies.find_one({"id": agency_id})
+    if not agency:
+        raise HTTPException(status_code=404, detail="Agency not found")
+    
+    # Get zone info
+    zone = await db.zones.find_one({"id": agency["zone_id"]})
+    
+    # Get all gares in this agency
+    gares = await db.gares.find({"agency_id": agency_id}).to_list(1000)
+    gare_ids = [g["id"] for g in gares]
+    
+    # Get all recharges for gares in this agency
+    recharges = await db.recharges.find({"gare_id": {"$in": gare_ids}}).sort("created_at", -1).to_list(1000)
+    
+    # Calculate statistics
+    total_recharges = len(recharges)
+    active_recharges = len([r for r in recharges if r["status"] == "active"])
+    expired_recharges = len([r for r in recharges if r["status"] == "expired"])
+    expiring_recharges = len([r for r in recharges if r["status"] == "expiring_soon"])
+    total_cost = sum([r["cost"] for r in recharges])
+    
+    # Group by operator and gare
+    operator_stats = {}
+    gare_stats = {}
+    for recharge in recharges:
+        op = recharge["operator"]
+        gare_id = recharge["gare_id"]
+        
+        if op not in operator_stats:
+            operator_stats[op] = {"count": 0, "cost": 0, "active": 0}
+        operator_stats[op]["count"] += 1
+        operator_stats[op]["cost"] += recharge["cost"]
+        if recharge["status"] == "active":
+            operator_stats[op]["active"] += 1
+            
+        if gare_id not in gare_stats:
+            gare_name = next((g["name"] for g in gares if g["id"] == gare_id), "Unknown")
+            gare_stats[gare_id] = {"name": gare_name, "count": 0, "cost": 0, "active": 0}
+        gare_stats[gare_id]["count"] += 1
+        gare_stats[gare_id]["cost"] += recharge["cost"]
+        if recharge["status"] == "active":
+            gare_stats[gare_id]["active"] += 1
+    
+    return {
+        "agency": agency,
+        "zone": zone,
+        "gares": gares,
+        "recharges": recharges,
+        "statistics": {
+            "total_gares": len(gares),
+            "total_recharges": total_recharges,
+            "active_recharges": active_recharges,
+            "expired_recharges": expired_recharges,
+            "expiring_recharges": expiring_recharges,
+            "total_cost": total_cost,
+            "operator_stats": operator_stats,
+            "gare_stats": gare_stats
+        },
+        "generated_at": datetime.utcnow()
+    }
+
+@api_router.get("/reports/zone/{zone_id}")
+async def get_zone_report(zone_id: str, current_user: User = Depends(get_current_user)):
+    await update_recharge_statuses()
+    
+    # Get zone info
+    zone = await db.zones.find_one({"id": zone_id})
+    if not zone:
+        raise HTTPException(status_code=404, detail="Zone not found")
+    
+    # Get all agencies in this zone
+    agencies = await db.agencies.find({"zone_id": zone_id}).to_list(1000)
+    agency_ids = [a["id"] for a in agencies]
+    
+    # Get all gares in these agencies
+    gares = await db.gares.find({"agency_id": {"$in": agency_ids}}).to_list(1000)
+    gare_ids = [g["id"] for g in gares]
+    
+    # Get all recharges for gares in this zone
+    recharges = await db.recharges.find({"gare_id": {"$in": gare_ids}}).sort("created_at", -1).to_list(1000)
+    
+    # Calculate statistics
+    total_recharges = len(recharges)
+    active_recharges = len([r for r in recharges if r["status"] == "active"])
+    expired_recharges = len([r for r in recharges if r["status"] == "expired"])
+    expiring_recharges = len([r for r in recharges if r["status"] == "expiring_soon"])
+    total_cost = sum([r["cost"] for r in recharges])
+    
+    # Group by operator, agency, and gare
+    operator_stats = {}
+    agency_stats = {}
+    for recharge in recharges:
+        op = recharge["operator"]
+        gare_id = recharge["gare_id"]
+        gare = next((g for g in gares if g["id"] == gare_id), None)
+        agency_id = gare["agency_id"] if gare else None
+        
+        if op not in operator_stats:
+            operator_stats[op] = {"count": 0, "cost": 0, "active": 0}
+        operator_stats[op]["count"] += 1
+        operator_stats[op]["cost"] += recharge["cost"]
+        if recharge["status"] == "active":
+            operator_stats[op]["active"] += 1
+            
+        if agency_id and agency_id not in agency_stats:
+            agency_name = next((a["name"] for a in agencies if a["id"] == agency_id), "Unknown")
+            agency_stats[agency_id] = {"name": agency_name, "count": 0, "cost": 0, "active": 0, "gares": 0}
+        if agency_id:
+            agency_stats[agency_id]["count"] += 1
+            agency_stats[agency_id]["cost"] += recharge["cost"]
+            if recharge["status"] == "active":
+                agency_stats[agency_id]["active"] += 1
+    
+    # Count gares per agency
+    for agency_id in agency_stats:
+        agency_stats[agency_id]["gares"] = len([g for g in gares if g["agency_id"] == agency_id])
+    
+    return {
+        "zone": zone,
+        "agencies": agencies,
+        "gares": gares,
+        "recharges": recharges,
+        "statistics": {
+            "total_agencies": len(agencies),
+            "total_gares": len(gares),
+            "total_recharges": total_recharges,
+            "active_recharges": active_recharges,
+            "expired_recharges": expired_recharges,
+            "expiring_recharges": expiring_recharges,
+            "total_cost": total_cost,
+            "operator_stats": operator_stats,
+            "agency_stats": agency_stats
+        },
+        "generated_at": datetime.utcnow()
+    }
+
+# WhatsApp sharing endpoint
+@api_router.post("/reports/share/whatsapp")
+async def share_report_whatsapp(
+    report_data: dict,
+    phone_number: str,
+    current_user: User = Depends(get_current_user)
+):
+    # Generate WhatsApp message
+    report_type = report_data.get("type", "general")
+    entity_name = report_data.get("entity_name", "")
+    stats = report_data.get("statistics", {})
+    
+    message = f"""📊 *Rapport {report_type.upper()} - {entity_name}*
+📅 Généré le: {datetime.utcnow().strftime('%d/%m/%Y à %H:%M')}
+
+📈 *Statistiques:*
+• Recharges totales: {stats.get('total_recharges', 0)}
+• Recharges actives: {stats.get('active_recharges', 0)}
+• Recharges expirées: {stats.get('expired_recharges', 0)}
+• Recharges expirant bientôt: {stats.get('expiring_recharges', 0)}
+• Coût total: {stats.get('total_cost', 0):,.0f} FCFA
+
+🏢 Système de gestion des recharges - Burkina Faso"""
+    
+    # WhatsApp Web URL - using urllib.parse for proper URL encoding
+    from urllib.parse import quote
+    encoded_message = quote(message)
+    whatsapp_url = f"https://wa.me/{phone_number}?text={encoded_message}"
+    
+    return {
+        "message": "WhatsApp link generated",
+        "whatsapp_url": whatsapp_url,
+        "formatted_message": message
+    }
+
+# Dashboard statistics (updated)
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     await update_recharge_statuses()
@@ -512,11 +739,24 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     expiring_recharges = await db.recharges.count_documents({"status": "expiring_soon"})
     expired_recharges = await db.recharges.count_documents({"status": "expired"})
     
-    # Get operator statistics
+    # Get operator statistics (updated with new operators)
+    all_operators = ["Orange", "Telecel", "Moov", "Onatel Fibre", "Orange Fibre", "Telecel Fibre"]
     operator_stats = []
-    for operator in ["Orange", "Telecel", "Moov"]:
+    for operator in all_operators:
         count = await db.recharges.count_documents({"operator": operator, "status": "active"})
-        operator_stats.append({"operator": operator, "count": count})
+        total_cost = 0
+        recharges = await db.recharges.find({"operator": operator}).to_list(1000)
+        total_cost = sum([r["cost"] for r in recharges])
+        operator_stats.append({
+            "operator": operator, 
+            "count": count, 
+            "total_cost": total_cost,
+            "type": "fibre" if "Fibre" in operator else "mobile"
+        })
+    
+    # Get payment type statistics
+    prepaid_count = await db.recharges.count_documents({"payment_type": "prepaid", "status": "active"})
+    postpaid_count = await db.recharges.count_documents({"payment_type": "postpaid", "status": "active"})
     
     # Get pending alerts
     pending_alerts = await db.alerts.count_documents({"status": "pending"})
@@ -530,6 +770,10 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
         "expiring_recharges": expiring_recharges,
         "expired_recharges": expired_recharges,
         "operator_stats": operator_stats,
+        "payment_type_stats": {
+            "prepaid": prepaid_count,
+            "postpaid": postpaid_count
+        },
         "pending_alerts": pending_alerts
     }
 
