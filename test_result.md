@@ -152,15 +152,18 @@ backend:
 
   - task: "Gare Management CRUD"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented complete CRUD operations for gares (railway stations). All authenticated users can manage gares. Gares are linked to agencies."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested gare CRUD operations. All authenticated users (super_admin, zone_admin, field_agent) can create/update/delete gares as expected. Gare creation, retrieval, update, and deletion all work correctly. Proper hierarchical relationship with agencies is maintained."
 
   - task: "Recharge Management System"
     implemented: true
