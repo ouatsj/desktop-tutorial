@@ -712,11 +712,9 @@ const GareForm = ({ agencies, onClose, onSuccess }) => {
   );
 };
 
-const RechargeForm = ({ gares, onClose, onSuccess }) => {
+const RechargeForm = ({ connections, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    gare_id: '',
-    operator: '',
-    operator_type: '',
+    connection_id: '',
     payment_type: '',
     start_date: '',
     end_date: '',
@@ -726,6 +724,7 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedConnection, setSelectedConnection] = useState(null);
 
   // Set default dates (start: today, end: 30 days from today)
   React.useEffect(() => {
@@ -762,97 +761,51 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
     }
   };
 
-  const mobileOperators = ['Orange', 'Telecel', 'Moov'];
-  const fibreOperators = ['Onatel Fibre', 'Orange Fibre', 'Telecel Fibre'];
-  
   const getMobileVolumeOptions = () => ['1GB', '5GB', '10GB', '25GB', '50GB', '100GB', 'Illimité'];
   const getFibreVolumeOptions = () => ['10Mbps', '20Mbps', '50Mbps', '100Mbps', '200Mbps', '500Mbps', '1Gbps'];
 
-  const handleOperatorTypeChange = (type) => {
+  const handleConnectionChange = (connectionId) => {
+    const connection = connections.find(c => c.id === connectionId);
+    setSelectedConnection(connection);
     setFormData({
       ...formData,
-      operator_type: type,
-      operator: '',
-      volume: '',
-      payment_type: type === 'fibre' ? 'postpaid' : 'prepaid'
+      connection_id: connectionId,
+      payment_type: connection?.operator_type === 'fibre' ? 'prepaid' : 'prepaid',
+      volume: ''
     });
   };
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">Ajouter une nouvelle recharge</h3>
+      <h3 className="text-lg font-semibold mb-4">Recharger une ligne de connexion</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Gare *
+            Ligne de connexion *
           </label>
           <select
-            value={formData.gare_id}
-            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
+            value={formData.connection_id}
+            onChange={(e) => handleConnectionChange(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
-            <option value="">Sélectionner une gare</option>
-            {gares.map((gare) => (
-              <option key={gare.id} value={gare.id}>
-                {gare.name}
+            <option value="">Sélectionner une ligne</option>
+            {connections.filter(c => c.status === 'active').map((connection) => (
+              <option key={connection.id} value={connection.id}>
+                {connection.line_number} - {connection.operator} ({connection.connection_type})
               </option>
             ))}
           </select>
+          {selectedConnection && (
+            <div className="mt-2 p-2 bg-gray-50 rounded-lg text-sm">
+              <p><strong>Opérateur:</strong> {selectedConnection.operator}</p>
+              <p><strong>Type:</strong> {selectedConnection.operator_type === 'mobile' ? '📱 Mobile' : '🌐 Fibre'}</p>
+              <p><strong>Service:</strong> {selectedConnection.connection_type}</p>
+            </div>
+          )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Type de connexion *
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => handleOperatorTypeChange('mobile')}
-              className={`p-3 border rounded-lg text-center transition duration-200 ${
-                formData.operator_type === 'mobile'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              📱 Mobile
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOperatorTypeChange('fibre')}
-              className={`p-3 border rounded-lg text-center transition duration-200 ${
-                formData.operator_type === 'fibre'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              🌐 Fibre
-            </button>
-          </div>
-        </div>
-
-        {formData.operator_type && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Opérateur *
-            </label>
-            <select
-              value={formData.operator}
-              onChange={(e) => setFormData({...formData, operator: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Sélectionner un opérateur</option>
-              {(formData.operator_type === 'mobile' ? mobileOperators : fibreOperators).map((operator) => (
-                <option key={operator} value={operator}>
-                  {operator}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {formData.operator_type && (
+        {selectedConnection && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Type de paiement *
@@ -861,12 +814,11 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setFormData({...formData, payment_type: 'prepaid'})}
-                disabled={formData.operator_type === 'fibre'}
                 className={`p-2 border rounded-lg text-center transition duration-200 ${
                   formData.payment_type === 'prepaid'
                     ? 'border-green-500 bg-green-50 text-green-700'
                     : 'border-gray-300 hover:border-gray-400'
-                } ${formData.operator_type === 'fibre' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                }`}
               >
                 💳 Prépayé
               </button>
@@ -912,10 +864,10 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
           </div>
         </div>
 
-        {formData.operator_type && (
+        {selectedConnection && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {formData.operator_type === 'mobile' ? 'Volume de données' : 'Débit'} *
+              {selectedConnection.operator_type === 'mobile' ? 'Volume de données' : 'Débit'} *
             </label>
             <select
               value={formData.volume}
@@ -923,8 +875,8 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Sélectionner {formData.operator_type === 'mobile' ? 'un volume' : 'un débit'}</option>
-              {(formData.operator_type === 'mobile' ? getMobileVolumeOptions() : getFibreVolumeOptions()).map((volume) => (
+              <option value="">Sélectionner {selectedConnection.operator_type === 'mobile' ? 'un volume' : 'un débit'}</option>
+              {(selectedConnection.operator_type === 'mobile' ? getMobileVolumeOptions() : getFibreVolumeOptions()).map((volume) => (
                 <option key={volume} value={volume}>
                   {volume}
                 </option>
@@ -986,7 +938,7 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
             disabled={loading}
             className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
           >
-            {loading ? 'Création...' : 'Créer'}
+            {loading ? 'Création...' : 'Recharger'}
           </button>
         </div>
       </form>
