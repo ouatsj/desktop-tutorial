@@ -1698,6 +1698,9 @@ const Dashboard = () => {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Ligne
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Gare
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1723,9 +1726,13 @@ const Dashboard = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {recharges.map((recharge) => {
                         const gare = gares.find(g => g.id === recharge.gare_id);
+                        const connection = connections.find(c => c.id === recharge.connection_id);
                         return (
                           <tr key={recharge.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                              {recharge.line_number || connection?.line_number || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {gare?.name || 'Gare inconnue'}
                             </td>
                             <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getOperatorColor(recharge.operator)}`}>
