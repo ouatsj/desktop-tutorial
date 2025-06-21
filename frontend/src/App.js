@@ -990,92 +990,6 @@ const Dashboard = () => {
           </div>
         )}
 
-        {activeTab === 'gares' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Gares</h2>
-              <button
-                onClick={() => openAddModal('gare')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-              >
-                Nouvelle gare
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {gares.map((gare) => {
-                const agency = agencies.find(a => a.id === gare.agency_id);
-                const zone = zones.find(z => z.id === agency?.zone_id);
-                const gareRecharges = recharges.filter(r => r.gare_id === gare.id);
-                
-                return (
-                  <div key={gare.id} className="bg-white rounded-lg shadow p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{gare.name}</h3>
-                      <div className="flex space-x-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          {gareRecharges.filter(r => r.status === 'active').length} actives
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p><strong>Zone:</strong> {zone?.name || 'N/A'}</p>
-                      <p><strong>Agence:</strong> {agency?.name || 'N/A'}</p>
-                      <p><strong>Recharges totales:</strong> {gareRecharges.length}</p>
-                    </div>
-
-                    {gare.description && (
-                      <p className="mt-3 text-sm text-gray-600">{gare.description}</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'agencies' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Agences</h2>
-              <button
-                onClick={() => openAddModal('agency')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-              >
-                Nouvelle agence
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {agencies.map((agency) => {
-                const zone = zones.find(z => z.id === agency.zone_id);
-                const agencyGares = gares.filter(g => g.agency_id === agency.id);
-                
-                return (
-                  <div key={agency.id} className="bg-white rounded-lg shadow p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{agency.name}</h3>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                        {agencyGares.length} gares
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p><strong>Zone:</strong> {zone?.name || 'N/A'}</p>
-                      <p><strong>Créée le:</strong> {new Date(agency.created_at).toLocaleDateString('fr-FR')}</p>
-                    </div>
-
-                    {agency.description && (
-                      <p className="mt-3 text-sm text-gray-600">{agency.description}</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {activeTab === 'zones' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -1090,36 +1004,214 @@ const Dashboard = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {zones.map((zone) => {
-                const zoneAgencies = agencies.filter(a => a.zone_id === zone.id);
-                const zoneGares = gares.filter(g => zoneAgencies.some(a => a.id === g.agency_id));
-                
-                return (
-                  <div key={zone.id} className="bg-white rounded-lg shadow p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{zone.name}</h3>
-                      <div className="flex space-x-2">
-                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                          {zoneAgencies.length} agences
-                        </span>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          {zoneGares.length} gares
+            {zones.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune zone trouvée</h3>
+                <p className="text-gray-600 mb-4">
+                  Commencez par créer votre première zone pour organiser vos agences et gares.
+                </p>
+                {user?.role === 'super_admin' && (
+                  <button
+                    onClick={() => openAddModal('zone')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                  >
+                    Créer la première zone
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {zones.map((zone) => {
+                  const zoneAgencies = agencies.filter(a => a.zone_id === zone.id);
+                  const zoneGares = gares.filter(g => zoneAgencies.some(a => a.id === g.agency_id));
+                  
+                  return (
+                    <div key={zone.id} className="bg-white rounded-lg shadow p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">{zone.name}</h3>
+                        <div className="flex space-x-2">
+                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                            {zoneAgencies.length} agences
+                          </span>
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {zoneGares.length} gares
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p><strong>Créée le:</strong> {new Date(zone.created_at).toLocaleDateString('fr-FR')}</p>
+                      </div>
+
+                      {zone.description && (
+                        <p className="mt-3 text-sm text-gray-600">{zone.description}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'agencies' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Agences</h2>
+              {(user?.role === 'super_admin' || user?.role === 'zone_admin') && zones.length > 0 && (
+                <button
+                  onClick={() => openAddModal('agency')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                >
+                  Nouvelle agence
+                </button>
+              )}
+            </div>
+
+            {zones.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune zone disponible</h3>
+                <p className="text-gray-600">
+                  Vous devez d'abord créer une zone avant de pouvoir ajouter des agences.
+                </p>
+              </div>
+            ) : agencies.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune agence trouvée</h3>
+                <p className="text-gray-600 mb-4">
+                  Créez votre première agence pour organiser les gares de votre zone.
+                </p>
+                {(user?.role === 'super_admin' || user?.role === 'zone_admin') && (
+                  <button
+                    onClick={() => openAddModal('agency')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                  >
+                    Créer la première agence
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {agencies.map((agency) => {
+                  const zone = zones.find(z => z.id === agency.zone_id);
+                  const agencyGares = gares.filter(g => g.agency_id === agency.id);
+                  
+                  return (
+                    <div key={agency.id} className="bg-white rounded-lg shadow p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">{agency.name}</h3>
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          {agencyGares.length} gares
                         </span>
                       </div>
-                    </div>
-                    
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <p><strong>Créée le:</strong> {new Date(zone.created_at).toLocaleDateString('fr-FR')}</p>
-                    </div>
+                      
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p><strong>Zone:</strong> {zone?.name || 'N/A'}</p>
+                        <p><strong>Créée le:</strong> {new Date(agency.created_at).toLocaleDateString('fr-FR')}</p>
+                      </div>
 
-                    {zone.description && (
-                      <p className="mt-3 text-sm text-gray-600">{zone.description}</p>
-                    )}
-                  </div>
-                );
-              })}
+                      {agency.description && (
+                        <p className="mt-3 text-sm text-gray-600">{agency.description}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'gares' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Gares</h2>
+              {agencies.length > 0 && (
+                <button
+                  onClick={() => openAddModal('gare')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                >
+                  Nouvelle gare
+                </button>
+              )}
             </div>
+
+            {agencies.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune agence disponible</h3>
+                <p className="text-gray-600">
+                  Vous devez d'abord créer une agence avant de pouvoir ajouter des gares.
+                </p>
+              </div>
+            ) : gares.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune gare trouvée</h3>
+                <p className="text-gray-600 mb-4">
+                  Créez votre première gare pour commencer à gérer les recharges.
+                </p>
+                <button
+                  onClick={() => openAddModal('gare')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                >
+                  Créer la première gare
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {gares.map((gare) => {
+                  const agency = agencies.find(a => a.id === gare.agency_id);
+                  const zone = zones.find(z => z.id === agency?.zone_id);
+                  const gareRecharges = recharges.filter(r => r.gare_id === gare.id);
+                  
+                  return (
+                    <div key={gare.id} className="bg-white rounded-lg shadow p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">{gare.name}</h3>
+                        <div className="flex space-x-2">
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {gareRecharges.filter(r => r.status === 'active').length} actives
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p><strong>Zone:</strong> {zone?.name || 'N/A'}</p>
+                        <p><strong>Agence:</strong> {agency?.name || 'N/A'}</p>
+                        <p><strong>Recharges totales:</strong> {gareRecharges.length}</p>
+                      </div>
+
+                      {gare.description && (
+                        <p className="mt-3 text-sm text-gray-600">{gare.description}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </main>
