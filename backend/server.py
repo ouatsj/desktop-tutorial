@@ -963,6 +963,7 @@ async def clear_test_data():
         zones_deleted = await db.zones.delete_many({})
         agencies_deleted = await db.agencies.delete_many({})
         gares_deleted = await db.gares.delete_many({})
+        connections_deleted = await db.connections.delete_many({})
         recharges_deleted = await db.recharges.delete_many({})
         alerts_deleted = await db.alerts.delete_many({})
         
@@ -973,6 +974,7 @@ async def clear_test_data():
                 "zones": zones_deleted.deleted_count,
                 "agencies": agencies_deleted.deleted_count,
                 "gares": gares_deleted.deleted_count,
+                "connections": connections_deleted.deleted_count,
                 "recharges": recharges_deleted.deleted_count,
                 "alerts": alerts_deleted.deleted_count
             }
