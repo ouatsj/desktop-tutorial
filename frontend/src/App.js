@@ -1460,11 +1460,11 @@ const Dashboard = () => {
                       </span>
                     </div>
                     <p className={`text-xl font-bold ${getOperatorColor(stat.operator)}`}>
-                      {stat.count}
+                      {stat.recharge_count}
                     </p>
                     <p className="text-gray-600 text-sm">{stat.operator}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {stat.total_cost.toLocaleString()} FCFA
+                      {stat.connections_count} connexions | {stat.total_cost.toLocaleString()} FCFA
                     </p>
                   </div>
                 ))}
