@@ -673,35 +673,14 @@ const Dashboard = () => {
         )}
       </main>
 
-      {/* Add Modal (simplified placeholder) */}
+      {/* Add Modal (implemented forms) */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">
-              Ajouter {modalType === 'zone' ? 'une zone' : 
-                      modalType === 'agency' ? 'une agence' : 
-                      modalType === 'gare' ? 'une gare' : 'une recharge'}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Formulaire d'ajout pour {modalType} (à implémenter)
-            </p>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  // Add logic here
-                }}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
-              >
-                Ajouter
-              </button>
-            </div>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            {modalType === 'zone' && <ZoneForm onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
+            {modalType === 'agency' && <AgencyForm zones={zones} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
+            {modalType === 'gare' && <GareForm agencies={agencies} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
+            {modalType === 'recharge' && <RechargeForm gares={gares} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
           </div>
         </div>
       )}
