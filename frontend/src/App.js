@@ -788,6 +788,259 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
   );
 };
 
+// Reports component
+const ReportsModal = ({ isOpen, onClose, type, entityId, entityName }) => {
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [showShareOptions, setShowShareOptions] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && entityId) {
+      fetchReport();
+    }
+  }, [isOpen, entityId, type]);
+
+  const fetchReport = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API}/reports/${type}/${entityId}`);
+      setReport(response.data);
+    } catch (error) {
+      console.error('Error fetching report:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const shareWhatsApp = async () => {
+    if (!phoneNumber || !report) return;
+
+    try {
+      const response = await axios.post(`${API}/reports/share/whatsapp`, {
+        report_data: {
+          type,
+          entity_name: entityName,
+          statistics: report.statistics
+        },
+        phone_number: phoneNumber
+      });
+      
+      // Open WhatsApp
+      window.open(response.data.whatsapp_url, '_blank');
+      setShowShareOptions(false);
+      setPhoneNumber('');
+    } catch (error) {
+      console.error('Error sharing report:', error);
+    }
+  };
+
+  const exportReport = () => {
+    if (!report) return;
+
+    // Create CSV content
+    const csvContent = [
+      ['Rapport', type.toUpperCase(), entityName],
+      ['Généré le', new Date(report.generated_at).toLocaleDateString('fr-FR')],
+      [],
+      ['Statistiques générales'],
+      ['Recharges totales', report.statistics.total_recharges],
+      ['Recharges actives', report.statistics.active_recharges],
+      ['Recharges expirées', report.statistics.expired_recharges],
+      ['Recharges expirant bientôt', report.statistics.expiring_recharges],
+      ['Coût total (FCFA)', report.statistics.total_cost],
+      [],
+      ['Statistiques par opérateur'],
+      ['Opérateur', 'Nombre', 'Coût total', 'Actives'],
+      ...Object.entries(report.statistics.operator_stats || {}).map(([op, stats]) => [
+        op, stats.count, stats.cost, stats.active
+      ])
+    ];
+
+    const csvString = csvContent.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `rapport-${type}-${entityName}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">
+              📊 Rapport {type.charAt(0).toUpperCase() + type.slice(1)} - {entityName}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Génération du rapport...</p>
+            </div>
+          ) : report ? (
+            <div className="space-y-6">
+              {/* Report Header */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-blue-600">{report.statistics.total_recharges}</p>
+                    <p className="text-sm text-gray-600">Total recharges</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{report.statistics.active_recharges}</p>
+                    <p className="text-sm text-gray-600">Actives</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-600">{report.statistics.expiring_recharges}</p>
+                    <p className="text-sm text-gray-600">Expirent bientôt</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{report.statistics.total_cost?.toLocaleString()} FCFA</p>
+                    <p className="text-sm text-gray-600">Coût total</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Operator Statistics */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Statistiques par opérateur</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(report.statistics.operator_stats || {}).map(([operator, stats]) => (
+                    <div key={operator} className="bg-white border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">{operator}</h4>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          operator.includes('Fibre') ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {operator.includes('Fibre') ? '🌐 Fibre' : '📱 Mobile'}
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <p>Recharges: {stats.count}</p>
+                        <p>Actives: {stats.active}</p>
+                        <p>Coût: {stats.cost?.toLocaleString()} FCFA</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recent Recharges */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Recharges récentes</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Opérateur</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Volume</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Coût</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {report.recharges.slice(0, 10).map((recharge) => (
+                        <tr key={recharge.id}>
+                          <td className="px-4 py-2 text-sm text-gray-900">
+                            {new Date(recharge.created_at).toLocaleDateString('fr-FR')}
+                          </td>
+                          <td className="px-4 py-2 text-sm font-medium text-gray-900">{recharge.operator}</td>
+                          <td className="px-4 py-2 text-sm text-gray-900">{recharge.volume}</td>
+                          <td className="px-4 py-2 text-sm text-gray-900">{recharge.cost.toLocaleString()} FCFA</td>
+                          <td className="px-4 py-2">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              recharge.status === 'active' ? 'bg-green-100 text-green-800' :
+                              recharge.status === 'expiring_soon' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {recharge.status === 'active' ? 'Actif' : 
+                               recharge.status === 'expiring_soon' ? 'Expire bientôt' : 'Expiré'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200">
+                <button
+                  onClick={exportReport}
+                  className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Exporter CSV</span>
+                </button>
+
+                <button
+                  onClick={() => setShowShareOptions(!showShareOptions)}
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  </svg>
+                  <span>Partager WhatsApp</span>
+                </button>
+
+                {showShareOptions && (
+                  <div className="w-full bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-2">Partager sur WhatsApp</h4>
+                    <div className="flex space-x-2">
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="Numéro WhatsApp (ex: 22670123456)"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        onClick={shareWhatsApp}
+                        disabled={!phoneNumber}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 disabled:opacity-50"
+                      >
+                        Envoyer
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 Format: code pays + numéro (ex: 22670123456 pour +226 70 12 34 56)
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Aucune donnée disponible pour ce rapport.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Dashboard component
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
