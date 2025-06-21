@@ -63,7 +63,7 @@
 }
 
 .card:hover {
-  @apply shadow-lg transform scale-102;
+  @apply shadow-lg transform scale-105;
 }
 
 /* Status badge styles */
