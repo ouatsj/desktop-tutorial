@@ -1377,7 +1377,10 @@ const Dashboard = () => {
                           Opérateur
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Volume
+                          Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Volume/Débit
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Coût
@@ -1399,13 +1402,24 @@ const Dashboard = () => {
                               {gare?.name || 'Gare inconnue'}
                             </td>
                             <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getOperatorColor(recharge.operator)}`}>
-                              {recharge.operator}
+                              <div className="flex items-center space-x-1">
+                                <span>{getOperatorIcon(recharge.operator)}</span>
+                                <span>{recharge.operator}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                recharge.payment_type === 'postpaid' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {recharge.payment_type === 'postpaid' ? '📅 Mensuel' : '💳 Prépayé'}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {recharge.volume}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {recharge.cost.toLocaleString()} FCFA
+                              {recharge.payment_type === 'postpaid' && <span className="text-xs text-gray-500">/mois</span>}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {new Date(recharge.end_date).toLocaleDateString('fr-FR')}
