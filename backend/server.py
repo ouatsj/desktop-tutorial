@@ -860,7 +860,12 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     total_zones = await db.zones.count_documents({})
     total_agencies = await db.agencies.count_documents({})
     total_gares = await db.gares.count_documents({})
+    total_connections = await db.connections.count_documents({})
     total_recharges = await db.recharges.count_documents({})
+    
+    # Get connection statistics
+    active_connections = await db.connections.count_documents({"status": "active"})
+    inactive_connections = await db.connections.count_documents({"status": "inactive"})
     
     # Get recharge statistics
     active_recharges = await db.recharges.count_documents({"status": "active"})
@@ -868,23 +873,33 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     expired_recharges = await db.recharges.count_documents({"status": "expired"})
     
     # Get operator statistics (updated with new operators)
-    all_operators = ["Orange", "Telecel", "Moov", "Onatel Fibre", "Orange Fibre", "Telecel Fibre"]
+    all_operators = [
+        "Orange", "Telecel", "Moov", 
+        "Onatel Fibre", "Orange Fibre", "Telecel Fibre", 
+        "Canalbox", "Faso Net", "Wayodi"
+    ]
     operator_stats = []
     for operator in all_operators:
         count = await db.recharges.count_documents({"operator": operator, "status": "active"})
+        connections_count = await db.connections.count_documents({"operator": operator, "status": "active"})
         total_cost = 0
         recharges = await db.recharges.find({"operator": operator}).to_list(1000)
         total_cost = sum([r["cost"] for r in recharges])
         operator_stats.append({
             "operator": operator, 
-            "count": count, 
+            "recharge_count": count,
+            "connections_count": connections_count,
             "total_cost": total_cost,
-            "type": "fibre" if "Fibre" in operator else "mobile"
+            "type": "fibre" if operator in ["Onatel Fibre", "Orange Fibre", "Telecel Fibre", "Canalbox", "Faso Net", "Wayodi"] else "mobile"
         })
     
     # Get payment type statistics
     prepaid_count = await db.recharges.count_documents({"payment_type": "prepaid", "status": "active"})
     postpaid_count = await db.recharges.count_documents({"payment_type": "postpaid", "status": "active"})
+    
+    # Get connection type statistics
+    mobile_connections = await db.connections.count_documents({"operator_type": "mobile", "status": "active"})
+    fibre_connections = await db.connections.count_documents({"operator_type": "fibre", "status": "active"})
     
     # Get pending alerts
     pending_alerts = await db.alerts.count_documents({"status": "pending"})
@@ -893,7 +908,10 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
         "total_zones": total_zones,
         "total_agencies": total_agencies,
         "total_gares": total_gares,
+        "total_connections": total_connections,
         "total_recharges": total_recharges,
+        "active_connections": active_connections,
+        "inactive_connections": inactive_connections,
         "active_recharges": active_recharges,
         "expiring_recharges": expiring_recharges,
         "expired_recharges": expired_recharges,
@@ -901,6 +919,10 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
         "payment_type_stats": {
             "prepaid": prepaid_count,
             "postpaid": postpaid_count
+        },
+        "connection_type_stats": {
+            "mobile": mobile_connections,
+            "fibre": fibre_connections
         },
         "pending_alerts": pending_alerts
     }
