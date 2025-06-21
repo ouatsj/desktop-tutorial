@@ -49,6 +49,9 @@ class Operator(str, Enum):
     ONATEL_FIBRE = "Onatel Fibre"
     ORANGE_FIBRE = "Orange Fibre"
     TELECEL_FIBRE = "Telecel Fibre"
+    CANALBOX = "Canalbox"
+    FASO_NET = "Faso Net"
+    WAYODI = "Wayodi"
 
 class OperatorType(str, Enum):
     MOBILE = "mobile"
@@ -57,6 +60,11 @@ class OperatorType(str, Enum):
 class PaymentType(str, Enum):
     PREPAID = "prepaid"  # Prépayé (recharge)
     POSTPAID = "postpaid"  # Postpayé (abonnement mensuel)
+
+class ConnectionStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    SUSPENDED = "suspended"
 
 class RechargeStatus(str, Enum):
     ACTIVE = "active"
