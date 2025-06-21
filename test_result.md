@@ -167,15 +167,18 @@ backend:
 
   - task: "Recharge Management System"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented recharge management with start/end dates, volume, cost, and status tracking. Supports 3 operators: Orange, Telecel, Moov. Automatic status updates (active, expiring_soon, expired)."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested recharge management system. Recharge creation, retrieval, update, and deletion all work correctly. Automatic status updates work as expected - recharges are automatically marked as 'expiring_soon' when within 3 days of expiration and 'expired' when past the end date. Filtering by gare_id, operator, and status works correctly."
 
   - task: "Alert System"
     implemented: true
