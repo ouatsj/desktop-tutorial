@@ -438,7 +438,83 @@ async def delete_gare(gare_id: str, current_user: User = Depends(get_current_use
     
     return {"message": "Gare deleted successfully"}
 
-# Recharge routes
+# Connection routes
+@api_router.post("/connections", response_model=Connection)
+async def create_connection(connection_data: ConnectionCreate, current_user: User = Depends(get_current_user)):
+    # Check if line number already exists
+    existing_connection = await db.connections.find_one({"line_number": connection_data.line_number})
+    if existing_connection:
+        raise HTTPException(status_code=400, detail="Ce numéro de ligne existe déjà")
+    
+    connection = Connection(**connection_data.dict())
+    await db.connections.insert_one(connection.dict())
+    return connection
+
+@api_router.get("/connections", response_model=List[Connection])
+async def get_connections(
+    gare_id: Optional[str] = None,
+    operator: Optional[Operator] = None,
+    status: Optional[ConnectionStatus] = None,
+    current_user: User = Depends(get_current_user)
+):
+    query = {}
+    if gare_id:
+        query["gare_id"] = gare_id
+    if operator:
+        query["operator"] = operator.value
+    if status:
+        query["status"] = status.value
+    
+    connections = await db.connections.find(query).sort("created_at", -1).to_list(1000)
+    return [Connection(**connection) for connection in connections]
+
+@api_router.get("/connections/{connection_id}", response_model=Connection)
+async def get_connection(connection_id: str, current_user: User = Depends(get_current_user)):
+    connection = await db.connections.find_one({"id": connection_id})
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    return Connection(**connection)
+
+@api_router.put("/connections/{connection_id}", response_model=Connection)
+async def update_connection(connection_id: str, connection_data: ConnectionCreate, current_user: User = Depends(get_current_user)):
+    # Check if new line number conflicts with existing one (except current)
+    if connection_data.line_number:
+        existing_connection = await db.connections.find_one({
+            "line_number": connection_data.line_number,
+            "id": {"$ne": connection_id}
+        })
+        if existing_connection:
+            raise HTTPException(status_code=400, detail="Ce numéro de ligne existe déjà")
+    
+    result = await db.connections.update_one(
+        {"id": connection_id},
+        {"$set": connection_data.dict()}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    connection = await db.connections.find_one({"id": connection_id})
+    return Connection(**connection)
+
+@api_router.delete("/connections/{connection_id}")
+async def delete_connection(connection_id: str, current_user: User = Depends(get_current_user)):
+    # Check if connection has active recharges
+    active_recharges = await db.recharges.count_documents({
+        "connection_id": connection_id,
+        "status": {"$in": ["active", "expiring_soon"]}
+    })
+    
+    if active_recharges > 0:
+        raise HTTPException(status_code=400, detail="Impossible de supprimer une ligne avec des recharges actives")
+    
+    result = await db.connections.delete_one({"id": connection_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    return {"message": "Connection deleted successfully"}
+
+# Recharge routes (updated)
 @api_router.post("/recharges", response_model=Recharge)
 async def create_recharge(recharge_data: RechargeCreate, current_user: User = Depends(get_current_user)):
     recharge_dict = recharge_data.dict()
