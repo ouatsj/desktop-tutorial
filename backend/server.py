@@ -41,9 +41,22 @@ class UserRole(str, Enum):
     FIELD_AGENT = "field_agent"
 
 class Operator(str, Enum):
+    # Opérateurs mobiles
     ORANGE = "Orange"
     TELECEL = "Telecel"
     MOOV = "Moov"
+    # Opérateurs fibre
+    ONATEL_FIBRE = "Onatel Fibre"
+    ORANGE_FIBRE = "Orange Fibre"
+    TELECEL_FIBRE = "Telecel Fibre"
+
+class OperatorType(str, Enum):
+    MOBILE = "mobile"
+    FIBRE = "fibre"
+
+class PaymentType(str, Enum):
+    PREPAID = "prepaid"  # Prépayé (recharge)
+    POSTPAID = "postpaid"  # Postpayé (abonnement mensuel)
 
 class RechargeStatus(str, Enum):
     ACTIVE = "active"
