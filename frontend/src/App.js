@@ -231,6 +231,212 @@ const Login = () => {
 };
 
 // Form components
+const ConnectionForm = ({ gares, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    line_number: '',
+    gare_id: '',
+    operator: '',
+    operator_type: '',
+    connection_type: '',
+    description: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await axios.post(`${API}/connections`, formData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la création');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mobileOperators = ['Orange', 'Telecel', 'Moov'];
+  const fibreOperators = ['Onatel Fibre', 'Orange Fibre', 'Telecel Fibre', 'Canalbox', 'Faso Net', 'Wayodi'];
+  
+  const handleOperatorTypeChange = (type) => {
+    setFormData({
+      ...formData,
+      operator_type: type,
+      operator: '',
+      connection_type: type === 'mobile' ? 'Internet Mobile' : 'Fibre Optique'
+    });
+  };
+
+  const generateLineNumber = () => {
+    if (formData.operator && formData.gare_id) {
+      const gare = gares.find(g => g.id === formData.gare_id);
+      const operatorCode = formData.operator.replace(/\s+/g, '').substring(0, 3).toUpperCase();
+      const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const suggested = `${operatorCode}-${gare?.name?.substring(0, 3).toUpperCase() || 'GAR'}-${randomNum}`;
+      setFormData({...formData, line_number: suggested});
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Créer une nouvelle ligne de connexion</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Gare *
+          </label>
+          <select
+            value={formData.gare_id}
+            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une gare</option>
+            {gares.map((gare) => (
+              <option key={gare.id} value={gare.id}>
+                {gare.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Type de connexion *
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => handleOperatorTypeChange('mobile')}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.operator_type === 'mobile'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              📱 Mobile
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOperatorTypeChange('fibre')}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.operator_type === 'fibre'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              🌐 Fibre
+            </button>
+          </div>
+        </div>
+
+        {formData.operator_type && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Opérateur *
+            </label>
+            <select
+              value={formData.operator}
+              onChange={(e) => setFormData({...formData, operator: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Sélectionner un opérateur</option>
+              {(formData.operator_type === 'mobile' ? mobileOperators : fibreOperators).map((operator) => (
+                <option key={operator} value={operator}>
+                  {operator}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Numéro de ligne *
+          </label>
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              value={formData.line_number}
+              onChange={(e) => setFormData({...formData, line_number: e.target.value})}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ex: ONG-GAR-001"
+              required
+            />
+            <button
+              type="button"
+              onClick={generateLineNumber}
+              disabled={!formData.operator || !formData.gare_id}
+              className="bg-gray-500 text-white px-3 py-2 rounded-lg hover:bg-gray-600 transition duration-200 disabled:opacity-50"
+              title="Générer automatiquement"
+            >
+              🎲
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            💡 Format conseillé: OPERATEUR-GARE-NUMERO (ex: ONG-CENTRAL-001)
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Type de service *
+          </label>
+          <input
+            type="text"
+            value={formData.connection_type}
+            onChange={(e) => setFormData({...formData, connection_type: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Ex: Internet Mobile, Fibre Optique, Data"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Informations additionnelles sur cette ligne..."
+            rows="2"
+          />
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Création...' : 'Créer'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 const ZoneForm = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
