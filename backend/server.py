@@ -517,11 +517,31 @@ async def delete_connection(connection_id: str, current_user: User = Depends(get
 # Recharge routes (updated)
 @api_router.post("/recharges", response_model=Recharge)
 async def create_recharge(recharge_data: RechargeCreate, current_user: User = Depends(get_current_user)):
+    # Get connection info
+    connection = await db.connections.find_one({"id": recharge_data.connection_id})
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
     recharge_dict = recharge_data.dict()
     recharge_dict["created_by"] = current_user.id
+    recharge_dict["line_number"] = connection["line_number"]
+    recharge_dict["gare_id"] = connection["gare_id"]
+    recharge_dict["operator"] = connection["operator"]
+    recharge_dict["operator_type"] = connection["operator_type"]
     
     recharge = Recharge(**recharge_dict)
     await db.recharges.insert_one(recharge.dict())
+    
+    # Update connection with last recharge info
+    await db.connections.update_one(
+        {"id": recharge_data.connection_id},
+        {
+            "$set": {
+                "last_recharge_date": recharge.start_date,
+                "expiry_date": recharge.end_date
+            }
+        }
+    )
     
     # Create alert for this recharge
     alert_date = recharge.end_date - timedelta(days=3)
@@ -529,7 +549,7 @@ async def create_recharge(recharge_data: RechargeCreate, current_user: User = De
         recharge_id=recharge.id,
         alert_date=alert_date,
         days_before_expiry=3,
-        message=f"Recharge for {recharge.operator.value} expires in 3 days"
+        message=f"Ligne {connection['line_number']} ({recharge.operator.value}) expire dans 3 jours"
     )
     await db.alerts.insert_one(alert.dict())
     
@@ -538,6 +558,7 @@ async def create_recharge(recharge_data: RechargeCreate, current_user: User = De
 @api_router.get("/recharges", response_model=List[Recharge])
 async def get_recharges(
     gare_id: Optional[str] = None,
+    connection_id: Optional[str] = None,
     operator: Optional[Operator] = None,
     status: Optional[RechargeStatus] = None,
     current_user: User = Depends(get_current_user)
@@ -547,6 +568,8 @@ async def get_recharges(
     query = {}
     if gare_id:
         query["gare_id"] = gare_id
+    if connection_id:
+        query["connection_id"] = connection_id
     if operator:
         query["operator"] = operator.value
     if status:
