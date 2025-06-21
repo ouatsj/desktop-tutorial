@@ -1273,16 +1273,28 @@ const Dashboard = () => {
       'Moov': 'text-green-600',
       'Onatel Fibre': 'text-purple-600',
       'Orange Fibre': 'text-orange-600',
-      'Telecel Fibre': 'text-blue-600'
+      'Telecel Fibre': 'text-blue-600',
+      'Canalbox': 'text-red-600',
+      'Faso Net': 'text-indigo-600',
+      'Wayodi': 'text-cyan-600'
     };
     return colors[operator] || 'text-gray-600';
   };
 
   const getOperatorIcon = (operator) => {
-    if (operator.includes('Fibre')) {
+    if (operator.includes('Fibre') || ['Canalbox', 'Faso Net', 'Wayodi'].includes(operator)) {
       return '🌐';
     }
     return '📱';
+  };
+
+  const getConnectionStatusColor = (status) => {
+    const colors = {
+      active: 'bg-green-100 text-green-800',
+      inactive: 'bg-gray-100 text-gray-800',
+      suspended: 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
   if (loading) {
