@@ -1383,6 +1383,20 @@ const Dashboard = () => {
 
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-2xl font-bold text-gray-900">{stats.total_connections}</p>
+                    <p className="text-gray-600">Connexions</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center">
                   <div className="p-2 bg-green-100 rounded-lg">
                     <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1408,18 +1422,25 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            {/* Connection Type Statistics */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Types de connexions</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-2xl">📱</span>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-2xl font-bold text-gray-900">{stats.pending_alerts}</p>
-                    <p className="text-gray-600">Alertes en attente</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.connection_type_stats.mobile}</p>
+                  <p className="text-gray-600">Connexions Mobile</p>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-2xl">🌐</span>
                   </div>
+                  <p className="text-2xl font-bold text-purple-600">{stats.connection_type_stats.fibre}</p>
+                  <p className="text-gray-600">Connexions Fibre</p>
                 </div>
               </div>
             </div>
