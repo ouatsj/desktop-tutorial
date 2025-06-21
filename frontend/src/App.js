@@ -2037,7 +2037,8 @@ const Dashboard = () => {
             {modalType === 'zone' && <ZoneForm onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
             {modalType === 'agency' && <AgencyForm zones={zones} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
             {modalType === 'gare' && <GareForm agencies={agencies} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
-            {modalType === 'recharge' && <RechargeForm gares={gares} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
+            {modalType === 'connection' && <ConnectionForm gares={gares} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
+            {modalType === 'recharge' && <RechargeForm connections={connections} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
           </div>
         </div>
       )}
