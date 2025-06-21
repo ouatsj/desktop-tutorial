@@ -137,15 +137,18 @@ backend:
 
   - task: "Agency Management CRUD"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented complete CRUD operations for agencies. Super_admin and zone_admin can create/update/delete agencies. Agencies are linked to zones."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested agency CRUD operations. Role-based access control is working correctly - super_admin and zone_admin can create/update/delete agencies, but field_agent cannot. Agency creation, retrieval, update, and deletion all work as expected. Proper hierarchical relationship with zones is maintained."
 
   - task: "Gare Management CRUD"
     implemented: true
