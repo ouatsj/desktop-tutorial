@@ -114,9 +114,32 @@ class GareCreate(BaseModel):
     agency_id: str
     description: Optional[str] = None
 
+class Connection(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    line_number: str  # Numéro de ligne unique (ex: "ONG-001", "TEL-FIBRE-025")
+    gare_id: str
+    operator: Operator
+    operator_type: OperatorType
+    connection_type: str  # ex: "Internet", "Data", "Fibre Optique"
+    status: ConnectionStatus = ConnectionStatus.ACTIVE
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    description: Optional[str] = None
+    last_recharge_date: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
+
+class ConnectionCreate(BaseModel):
+    line_number: str
+    gare_id: str
+    operator: Operator
+    operator_type: OperatorType
+    connection_type: str
+    description: Optional[str] = None
+
 class Recharge(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    gare_id: str
+    connection_id: str  # Lié à une ligne spécifique
+    line_number: str  # Copie pour faciliter les requêtes
+    gare_id: str  # Copie pour faciliter les requêtes
     operator: Operator
     operator_type: OperatorType
     payment_type: PaymentType
@@ -130,9 +153,7 @@ class Recharge(BaseModel):
     description: Optional[str] = None
 
 class RechargeCreate(BaseModel):
-    gare_id: str
-    operator: Operator
-    operator_type: OperatorType
+    connection_id: str
     payment_type: PaymentType
     start_date: datetime
     end_date: datetime
