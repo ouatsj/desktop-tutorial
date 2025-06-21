@@ -519,6 +519,54 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
 async def root():
     return {"message": "Burkina Faso Railway Recharge Management System API"}
 
+# Admin endpoint to reset database (remove all test data)
+@api_router.delete("/admin/reset-database")
+async def reset_database(current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.SUPER_ADMIN:
+        raise HTTPException(status_code=403, detail="Only Super Admin can reset database")
+    
+    try:
+        # Clear all collections
+        await db.users.delete_many({})
+        await db.zones.delete_many({})
+        await db.agencies.delete_many({})
+        await db.gares.delete_many({})
+        await db.recharges.delete_many({})
+        await db.alerts.delete_many({})
+        
+        return {
+            "message": "Database reset successfully",
+            "collections_cleared": ["users", "zones", "agencies", "gares", "recharges", "alerts"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error resetting database: {str(e)}")
+
+# Simple reset endpoint without authentication (for initial setup)
+@api_router.post("/admin/clear-test-data")
+async def clear_test_data():
+    try:
+        # Clear all collections
+        users_deleted = await db.users.delete_many({})
+        zones_deleted = await db.zones.delete_many({})
+        agencies_deleted = await db.agencies.delete_many({})
+        gares_deleted = await db.gares.delete_many({})
+        recharges_deleted = await db.recharges.delete_many({})
+        alerts_deleted = await db.alerts.delete_many({})
+        
+        return {
+            "message": "All test data cleared successfully",
+            "deleted_counts": {
+                "users": users_deleted.deleted_count,
+                "zones": zones_deleted.deleted_count,
+                "agencies": agencies_deleted.deleted_count,
+                "gares": gares_deleted.deleted_count,
+                "recharges": recharges_deleted.deleted_count,
+                "alerts": alerts_deleted.deleted_count
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error clearing test data: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
