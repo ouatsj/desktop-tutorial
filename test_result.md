@@ -293,12 +293,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Authentication UI"
-    - "Dashboard Interface"
-    - "Recharge Management UI"
-    - "Hierarchical Structure UI"
-    - "Alert Notifications"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
