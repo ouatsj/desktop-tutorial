@@ -510,10 +510,13 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     gare_id: '',
     operator: '',
+    operator_type: '',
+    payment_type: '',
     start_date: '',
     end_date: '',
     volume: '',
-    cost: ''
+    cost: '',
+    description: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -553,8 +556,21 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
     }
   };
 
-  const operators = ['Orange', 'Telecel', 'Moov'];
-  const volumeOptions = ['1GB', '5GB', '10GB', '25GB', '50GB', '100GB', 'Illimité'];
+  const mobileOperators = ['Orange', 'Telecel', 'Moov'];
+  const fibreOperators = ['Onatel Fibre', 'Orange Fibre', 'Telecel Fibre'];
+  
+  const getMobileVolumeOptions = () => ['1GB', '5GB', '10GB', '25GB', '50GB', '100GB', 'Illimité'];
+  const getFibreVolumeOptions = () => ['10Mbps', '20Mbps', '50Mbps', '100Mbps', '200Mbps', '500Mbps', '1Gbps'];
+
+  const handleOperatorTypeChange = (type) => {
+    setFormData({
+      ...formData,
+      operator_type: type,
+      operator: '',
+      volume: '',
+      payment_type: type === 'fibre' ? 'postpaid' : 'prepaid'
+    });
+  };
 
   return (
     <div>
@@ -578,24 +594,91 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
             ))}
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Opérateur *
+            Type de connexion *
           </label>
-          <select
-            value={formData.operator}
-            onChange={(e) => setFormData({...formData, operator: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">Sélectionner un opérateur</option>
-            {operators.map((operator) => (
-              <option key={operator} value={operator}>
-                {operator}
-              </option>
-            ))}
-          </select>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => handleOperatorTypeChange('mobile')}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.operator_type === 'mobile'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              📱 Mobile
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOperatorTypeChange('fibre')}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.operator_type === 'fibre'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              🌐 Fibre
+            </button>
+          </div>
         </div>
+
+        {formData.operator_type && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Opérateur *
+            </label>
+            <select
+              value={formData.operator}
+              onChange={(e) => setFormData({...formData, operator: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Sélectionner un opérateur</option>
+              {(formData.operator_type === 'mobile' ? mobileOperators : fibreOperators).map((operator) => (
+                <option key={operator} value={operator}>
+                  {operator}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {formData.operator_type && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Type de paiement *
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, payment_type: 'prepaid'})}
+                disabled={formData.operator_type === 'fibre'}
+                className={`p-2 border rounded-lg text-center transition duration-200 ${
+                  formData.payment_type === 'prepaid'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                } ${formData.operator_type === 'fibre' ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                💳 Prépayé
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, payment_type: 'postpaid'})}
+                className={`p-2 border rounded-lg text-center transition duration-200 ${
+                  formData.payment_type === 'postpaid'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                📅 Postpayé (Mensuel)
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -622,24 +705,28 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
             />
           </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Volume *
-          </label>
-          <select
-            value={formData.volume}
-            onChange={(e) => setFormData({...formData, volume: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">Sélectionner un volume</option>
-            {volumeOptions.map((volume) => (
-              <option key={volume} value={volume}>
-                {volume}
-              </option>
-            ))}
-          </select>
-        </div>
+
+        {formData.operator_type && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {formData.operator_type === 'mobile' ? 'Volume de données' : 'Débit'} *
+            </label>
+            <select
+              value={formData.volume}
+              onChange={(e) => setFormData({...formData, volume: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Sélectionner {formData.operator_type === 'mobile' ? 'un volume' : 'un débit'}</option>
+              {(formData.operator_type === 'mobile' ? getMobileVolumeOptions() : getFibreVolumeOptions()).map((volume) => (
+                <option key={volume} value={volume}>
+                  {volume}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Coût (FCFA) *
@@ -649,17 +736,37 @@ const RechargeForm = ({ gares, onClose, onSuccess }) => {
             value={formData.cost}
             onChange={(e) => setFormData({...formData, cost: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Ex: 25000"
+            placeholder={formData.payment_type === 'postpaid' ? 'Ex: 50000 (mensuel)' : 'Ex: 25000'}
             min="0"
             step="100"
             required
           />
+          {formData.payment_type === 'postpaid' && (
+            <p className="text-xs text-gray-500 mt-1">
+              💡 Pour les abonnements mensuels, entrez le coût mensuel
+            </p>
+          )}
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Notes additionnelles..."
+            rows="2"
+          />
+        </div>
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
+
         <div className="flex space-x-4">
           <button
             type="button"
