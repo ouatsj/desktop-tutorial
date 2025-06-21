@@ -110,21 +110,27 @@ class Recharge(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     gare_id: str
     operator: Operator
+    operator_type: OperatorType
+    payment_type: PaymentType
     start_date: datetime
     end_date: datetime
-    volume: str  # e.g., "10GB", "Unlimited"
+    volume: str  # e.g., "10GB", "Unlimited", "100Mbps"
     cost: float
     status: RechargeStatus = RechargeStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
     created_by: str
+    description: Optional[str] = None
 
 class RechargeCreate(BaseModel):
     gare_id: str
     operator: Operator
+    operator_type: OperatorType
+    payment_type: PaymentType
     start_date: datetime
     end_date: datetime
     volume: str
     cost: float
+    description: Optional[str] = None
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
