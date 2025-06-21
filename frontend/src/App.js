@@ -1207,6 +1207,7 @@ const Dashboard = () => {
   const [zones, setZones] = useState([]);
   const [agencies, setAgencies] = useState([]);
   const [gares, setGares] = useState([]);
+  const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -1222,13 +1223,14 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [statsRes, alertsRes, rechargesRes, zonesRes, agenciesRes, garesRes] = await Promise.all([
+      const [statsRes, alertsRes, rechargesRes, zonesRes, agenciesRes, garesRes, connectionsRes] = await Promise.all([
         axios.get(`${API}/dashboard/stats`),
         axios.get(`${API}/alerts`),
         axios.get(`${API}/recharges`),
         axios.get(`${API}/zones`),
         axios.get(`${API}/agencies`),
-        axios.get(`${API}/gares`)
+        axios.get(`${API}/gares`),
+        axios.get(`${API}/connections`)
       ]);
 
       setStats(statsRes.data);
@@ -1237,6 +1239,7 @@ const Dashboard = () => {
       setZones(zonesRes.data);
       setAgencies(agenciesRes.data);
       setGares(garesRes.data);
+      setConnections(connectionsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
