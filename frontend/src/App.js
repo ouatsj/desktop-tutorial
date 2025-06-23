@@ -1781,24 +1781,32 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
                 Gestion des Recharges - Burkina Faso
               </h1>
-              <p className="text-gray-600">Système de suivi des connexions internet</p>
+              <p className="text-gray-600 text-sm hidden sm:block">Système de suivi des connexions internet</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
                 <p className="text-xs text-gray-500">{user?.role?.replace('_', ' ')}</p>
               </div>
+              <div className="text-right sm:hidden">
+                <p className="text-xs font-medium text-gray-900 truncate max-w-20">{user?.full_name}</p>
+              </div>
               <button
                 onClick={logout}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+                className="bg-red-600 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg hover:bg-red-700 transition duration-200 text-sm"
               >
-                Déconnexion
+                <span className="hidden sm:inline">Déconnexion</span>
+                <span className="sm:hidden">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </span>
               </button>
             </div>
           </div>
@@ -1807,23 +1815,49 @@ const Dashboard = () => {
 
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
-        <div className="px-6">
-          <div className="flex space-x-8">
+        <div className="px-4 sm:px-6">
+          <div className="flex space-x-2 sm:space-x-8 overflow-x-auto">
             {['dashboard', 'connexions', 'recharges', 'gares', 'agencies', 'zones'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm capitalize ${
+                className={`py-4 px-2 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === tab
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {tab === 'dashboard' ? 'Tableau de bord' : 
-                 tab === 'connexions' ? 'Lignes de connexion' :
-                 tab === 'recharges' ? 'Recharges' :
-                 tab === 'gares' ? 'Gares' :
-                 tab === 'agencies' ? 'Agences' : 'Zones'}
+                {tab === 'dashboard' ? (
+                  <>
+                    <span className="hidden sm:inline">Tableau de bord</span>
+                    <span className="sm:hidden">📊</span>
+                  </>
+                ) : tab === 'connexions' ? (
+                  <>
+                    <span className="hidden sm:inline">Lignes de connexion</span>
+                    <span className="sm:hidden">🔗</span>
+                  </>
+                ) : tab === 'recharges' ? (
+                  <>
+                    <span className="hidden sm:inline">Recharges</span>
+                    <span className="sm:hidden">💳</span>
+                  </>
+                ) : tab === 'gares' ? (
+                  <>
+                    <span className="hidden sm:inline">Gares</span>
+                    <span className="sm:hidden">🚂</span>
+                  </>
+                ) : tab === 'agencies' ? (
+                  <>
+                    <span className="hidden sm:inline">Agences</span>
+                    <span className="sm:hidden">🏢</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Zones</span>
+                    <span className="sm:hidden">📍</span>
+                  </>
+                )}
               </button>
             ))}
           </div>
