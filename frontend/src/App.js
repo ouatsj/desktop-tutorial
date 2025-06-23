@@ -2560,7 +2560,7 @@ const Dashboard = () => {
         )}
       </main>
 
-      {/* Add Modal (implemented forms) */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -2572,6 +2572,29 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Modal */}
+      {showEditModal && selectedItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            {modalType === 'zone' && <EditZoneForm zone={selectedItem} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
+            {modalType === 'agency' && <EditAgencyForm agency={selectedItem} zones={zones} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
+            {modalType === 'gare' && <EditGareForm gare={selectedItem} agencies={agencies} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
+            {modalType === 'connection' && <EditConnectionForm connection={selectedItem} gares={gares} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {setShowDeleteModal(false); setSelectedItem(null);}}
+        onConfirm={handleDelete}
+        title={`Supprimer ${modalType === 'zone' ? 'la zone' : modalType === 'agency' ? "l'agence" : modalType === 'gare' ? 'la gare' : modalType === 'connection' ? 'la ligne' : 'la recharge'}`}
+        message={`Êtes-vous sûr de vouloir supprimer ${selectedItem?.name || selectedItem?.line_number || 'cet élément'} ? Cette action est irréversible.`}
+        confirmText="Supprimer"
+        isDestructive={true}
+      />
 
       {/* Reports Modal */}
       <ReportsModal
