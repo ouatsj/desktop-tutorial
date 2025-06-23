@@ -105,110 +105,89 @@
 user_problem_statement: "Système de gestion des recharges de connexions internet pour les gares du Burkina Faso avec nouvelles fonctionnalités : modification/suppression des entités, système de lignes de connexion avec numéros, nouveaux opérateurs fibre (Canalbox, Faso Net, Wayodi), prépayé pour fibre, interface mobile responsive."
 
 backend:
-  - task: "Authentication System"
+  - task: "Edit/Delete Zone Management"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented JWT-based authentication with user registration, login, and role-based access control. Supports 3 roles: super_admin, zone_admin, field_agent. Password hashing with bcrypt."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - All authentication tests successful. User registration works for all roles, login generates valid JWT tokens, protected endpoints work correctly, role-based access control implemented properly."
+        comment: "Added PUT and DELETE endpoints for zones with proper role-based access control (super_admin only)."
 
-  - task: "Zone Management CRUD"
+  - task: "Edit/Delete Agency Management"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete CRUD operations for zones. Only super_admin can create/update/delete zones. All users can read zones."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - Zone CRUD operations work correctly. Super_admin can create/update/delete zones, other roles are properly restricted. Zone retrieval works for all authenticated users."
+        comment: "Added PUT and DELETE endpoints for agencies with proper role-based access control (super_admin and zone_admin)."
 
-  - task: "Agency Management CRUD"
+  - task: "Edit/Delete Gare Management"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete CRUD operations for agencies. Super_admin and zone_admin can create/update/delete agencies. Agencies are linked to zones."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - Agency CRUD operations work correctly. Super_admin and zone_admin can manage agencies, field_agent properly restricted. Hierarchical relationship with zones working correctly."
+        comment: "Added PUT and DELETE endpoints for gares with proper authentication."
 
-  - task: "Gare Management CRUD"
+  - task: "Connection Lines System"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete CRUD operations for gares (railway stations). All authenticated users can manage gares. Gares are linked to agencies."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - Gare CRUD operations work correctly. All authenticated users can manage gares. Hierarchical relationship with agencies working correctly."
+        comment: "Implemented complete connection lines system with unique line numbers, CRUD operations, and status tracking. Recharges now linked to specific lines."
 
-  - task: "Recharge Management System"
+  - task: "Extended Fiber Operators"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented recharge management with start/end dates, volume, cost, and status tracking. Supports 3 operators: Orange, Telecel, Moov. Automatic status updates (active, expiring_soon, expired)."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - Recharge management system works perfectly. All 3 operators supported, automatic status updates working, CRUD operations and filtering working correctly."
+        comment: "Added new fiber operators: Canalbox, Faso Net, Wayodi. Updated operator enum and statistics."
 
-  - task: "Alert System"
+  - task: "Prepaid Fiber Support"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented alert system that creates alerts 3 days before recharge expiration. Users can view pending alerts and dismiss them."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - Alert system working correctly. Alerts automatically created on recharge creation, alert retrieval and dismissal working properly."
+        comment: "Removed restriction on fiber being postpaid only. Both prepaid and postpaid now supported for all operator types."
 
-  - task: "Dashboard Statistics API"
+  - task: "Updated Dashboard Statistics"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented comprehensive dashboard API with statistics: total zones/agencies/gares, recharge status counts, operator statistics, pending alerts count."
-      - working: true
-        agent: "testing"
-        comment: "PASSED - Dashboard statistics API working perfectly. All counts accurate, operator statistics correct, comprehensive metrics provided."
+        comment: "Enhanced dashboard stats with connection counts, mobile vs fiber breakdown, extended operator statistics."
 
 frontend:
   - task: "Authentication UI"
