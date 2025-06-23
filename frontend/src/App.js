@@ -1645,7 +1645,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [modalType, setModalType] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [reportConfig, setReportConfig] = useState({ type: '', entityId: '', entityName: '' });
 
@@ -1684,6 +1687,38 @@ const Dashboard = () => {
   const openAddModal = (type) => {
     setModalType(type);
     setShowAddModal(true);
+  };
+
+  const openEditModal = (type, item) => {
+    setModalType(type);
+    setSelectedItem(item);
+    setShowEditModal(true);
+  };
+
+  const openDeleteModal = (type, item) => {
+    setModalType(type);
+    setSelectedItem(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const endpoints = {
+        zone: 'zones',
+        agency: 'agencies',
+        gare: 'gares',
+        connection: 'connections',
+        recharge: 'recharges'
+      };
+      
+      await axios.delete(`${API}/${endpoints[modalType]}/${selectedItem.id}`);
+      setShowDeleteModal(false);
+      setSelectedItem(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert(error.response?.data?.detail || 'Erreur lors de la suppression');
+    }
   };
 
   const openReportModal = (type, entityId, entityName) => {
