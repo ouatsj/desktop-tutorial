@@ -230,6 +230,440 @@ const Login = () => {
   );
 };
 
+// Edit forms
+const EditZoneForm = ({ zone, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    name: zone?.name || '',
+    description: zone?.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await axios.put(`${API}/zones/${zone.id}`, formData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Modifier la zone</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nom de la zone *
+          </label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+          />
+        </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Modification...' : 'Modifier'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const EditAgencyForm = ({ agency, zones, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    name: agency?.name || '',
+    zone_id: agency?.zone_id || '',
+    description: agency?.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await axios.put(`${API}/agencies/${agency.id}`, formData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Modifier l'agence</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nom de l'agence *
+          </label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Zone *
+          </label>
+          <select
+            value={formData.zone_id}
+            onChange={(e) => setFormData({...formData, zone_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une zone</option>
+            {zones.map((zone) => (
+              <option key={zone.id} value={zone.id}>
+                {zone.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+          />
+        </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Modification...' : 'Modifier'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const EditGareForm = ({ gare, agencies, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    name: gare?.name || '',
+    agency_id: gare?.agency_id || '',
+    description: gare?.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await axios.put(`${API}/gares/${gare.id}`, formData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Modifier la gare</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nom de la gare *
+          </label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Agence *
+          </label>
+          <select
+            value={formData.agency_id}
+            onChange={(e) => setFormData({...formData, agency_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une agence</option>
+            {agencies.map((agency) => (
+              <option key={agency.id} value={agency.id}>
+                {agency.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+          />
+        </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Modification...' : 'Modifier'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const EditConnectionForm = ({ connection, gares, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    line_number: connection?.line_number || '',
+    gare_id: connection?.gare_id || '',
+    operator: connection?.operator || '',
+    operator_type: connection?.operator_type || '',
+    connection_type: connection?.connection_type || '',
+    description: connection?.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await axios.put(`${API}/connections/${connection.id}`, formData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mobileOperators = ['Orange', 'Telecel', 'Moov'];
+  const fibreOperators = ['Onatel Fibre', 'Orange Fibre', 'Telecel Fibre', 'Canalbox', 'Faso Net', 'Wayodi'];
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Modifier la ligne de connexion</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Numéro de ligne *
+          </label>
+          <input
+            type="text"
+            value={formData.line_number}
+            onChange={(e) => setFormData({...formData, line_number: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Gare *
+          </label>
+          <select
+            value={formData.gare_id}
+            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une gare</option>
+            {gares.map((gare) => (
+              <option key={gare.id} value={gare.id}>
+                {gare.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Opérateur *
+          </label>
+          <select
+            value={formData.operator}
+            onChange={(e) => setFormData({...formData, operator: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner un opérateur</option>
+            {(formData.operator_type === 'mobile' ? mobileOperators : fibreOperators).map((operator) => (
+              <option key={operator} value={operator}>
+                {operator}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Type de service *
+          </label>
+          <input
+            type="text"
+            value={formData.connection_type}
+            onChange={(e) => setFormData({...formData, connection_type: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="2"
+          />
+        </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Modification...' : 'Modifier'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Confirmation modal
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Supprimer", isDestructive = true }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+        <p className="text-gray-600 mb-6">{message}</p>
+        <div className="flex space-x-4">
+          <button
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`flex-1 py-2 px-4 rounded-lg transition duration-200 ${
+              isDestructive 
+                ? 'bg-red-600 text-white hover:bg-red-700' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Form components
 const ConnectionForm = ({ gares, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
