@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Créer une application mobile et web pour gérer les recharges de connexions internet dans les gares du Burkina Faso. Le pays est structuré en zones → agences → gares. Chaque gare enregistre les recharges mensuelles par opérateur (Orange, Telecel, Moov). Fonctionnalités : CRUD pour zones/agences/gares, enregistrement des recharges mensuelles, système d'alerte avant expiration, tableau de bord centralisé, rôles utilisateurs, mode hors-ligne avec synchronisation."
+user_problem_statement: "Système de gestion des recharges de connexions internet pour les gares du Burkina Faso avec nouvelles fonctionnalités : modification/suppression des entités, système de lignes de connexion avec numéros, nouveaux opérateurs fibre (Canalbox, Faso Net, Wayodi), prépayé pour fibre, interface mobile responsive."
 
 backend:
   - task: "Authentication System"
