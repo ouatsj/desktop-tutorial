@@ -48,10 +48,66 @@ TEST_GARE = {
     "description": "Gare principale de Bobo-Dioulasso"
 }
 
+# Test data for connections
+TEST_CONNECTION = {
+    "line_number": f"ONG-CENTRAL-{uuid.uuid4().hex[:4]}",
+    "operator": "Orange",
+    "operator_type": "mobile",
+    "connection_type": "Internet",
+    "description": "Connexion mobile Orange pour la gare centrale"
+}
+
+# Test data for fiber connections
+TEST_FIBER_CONNECTIONS = [
+    {
+        "line_number": f"ONATEL-FIBRE-{uuid.uuid4().hex[:4]}",
+        "operator": "Onatel Fibre",
+        "operator_type": "fibre",
+        "connection_type": "Fibre Optique",
+        "description": "Connexion fibre Onatel pour la gare centrale"
+    },
+    {
+        "line_number": f"ORANGE-FIBRE-{uuid.uuid4().hex[:4]}",
+        "operator": "Orange Fibre",
+        "operator_type": "fibre",
+        "connection_type": "Fibre Optique",
+        "description": "Connexion fibre Orange pour la gare centrale"
+    },
+    {
+        "line_number": f"TELECEL-FIBRE-{uuid.uuid4().hex[:4]}",
+        "operator": "Telecel Fibre",
+        "operator_type": "fibre",
+        "connection_type": "Fibre Optique",
+        "description": "Connexion fibre Telecel pour la gare centrale"
+    },
+    {
+        "line_number": f"CANALBOX-{uuid.uuid4().hex[:4]}",
+        "operator": "Canalbox",
+        "operator_type": "fibre",
+        "connection_type": "Fibre Optique",
+        "description": "Connexion Canalbox pour la gare centrale"
+    },
+    {
+        "line_number": f"FASONET-{uuid.uuid4().hex[:4]}",
+        "operator": "Faso Net",
+        "operator_type": "fibre",
+        "connection_type": "Fibre Optique",
+        "description": "Connexion Faso Net pour la gare centrale"
+    },
+    {
+        "line_number": f"WAYODI-{uuid.uuid4().hex[:4]}",
+        "operator": "Wayodi",
+        "operator_type": "fibre",
+        "connection_type": "Fibre Optique",
+        "description": "Connexion Wayodi pour la gare centrale"
+    }
+]
+
 TEST_RECHARGE = {
     "operator": "Orange",
     "volume": "50GB",
-    "cost": 25000.0  # in FCFA
+    "cost": 25000.0,  # in FCFA
+    "payment_type": "prepaid"
 }
 
 # Store tokens and IDs
@@ -60,6 +116,8 @@ created_ids = {
     "zone": None,
     "agency": None,
     "gare": None,
+    "connection": None,
+    "fiber_connections": {},
     "recharge": None,
     "alert": None
 }
