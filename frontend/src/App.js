@@ -1865,85 +1865,85 @@ const Dashboard = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         {activeTab === 'dashboard' && stats && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-blue-100 rounded-lg">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-2xl font-bold text-gray-900">{stats.total_gares}</p>
-                    <p className="text-gray-600">Gares</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.total_gares}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm">Gares</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-purple-100 rounded-lg">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-2xl font-bold text-gray-900">{stats.total_connections}</p>
-                    <p className="text-gray-600">Connexions</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.total_connections}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm">Connexions</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-green-100 rounded-lg">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-2xl font-bold text-gray-900">{stats.active_recharges}</p>
-                    <p className="text-gray-600">Recharges actives</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.active_recharges}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm">Recharges actives</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-yellow-100 rounded-lg">
-                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-2xl font-bold text-gray-900">{stats.expiring_recharges}</p>
-                    <p className="text-gray-600">Expirent bientôt</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.expiring_recharges}</p>
+                    <p className="text-gray-600 text-xs sm:text-sm">Expirent bientôt</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Connection Type Statistics */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Types de connexions</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <span className="text-2xl">📱</span>
+                    <span className="text-xl sm:text-2xl">📱</span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">{stats.connection_type_stats.mobile}</p>
-                  <p className="text-gray-600">Connexions Mobile</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.connection_type_stats.mobile}</p>
+                  <p className="text-gray-600 text-xs sm:text-sm">Connexions Mobile</p>
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-center p-3 sm:p-4 bg-purple-50 rounded-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <span className="text-2xl">🌐</span>
+                    <span className="text-xl sm:text-2xl">🌐</span>
                   </div>
-                  <p className="text-2xl font-bold text-purple-600">{stats.connection_type_stats.fibre}</p>
-                  <p className="text-gray-600">Connexions Fibre</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-600">{stats.connection_type_stats.fibre}</p>
+                  <p className="text-gray-600 text-xs sm:text-sm">Connexions Fibre</p>
                 </div>
               </div>
             </div>
