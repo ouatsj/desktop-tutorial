@@ -107,87 +107,108 @@ user_problem_statement: "Système de gestion des recharges de connexions interne
 backend:
   - task: "Edit/Delete Zone Management"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added PUT and DELETE endpoints for zones with proper role-based access control (super_admin only)."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested PUT and DELETE endpoints for zones. Role-based access control is working correctly - only super_admin can update or delete zones."
 
   - task: "Edit/Delete Agency Management"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added PUT and DELETE endpoints for agencies with proper role-based access control (super_admin and zone_admin)."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested PUT and DELETE endpoints for agencies. Role-based access control is working correctly - super_admin and zone_admin can update/delete agencies, but field_agent cannot."
 
   - task: "Edit/Delete Gare Management"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added PUT and DELETE endpoints for gares with proper authentication."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested PUT and DELETE endpoints for gares. All authenticated users can update gares, and deletion works correctly."
 
   - task: "Connection Lines System"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented complete connection lines system with unique line numbers, CRUD operations, and status tracking. Recharges now linked to specific lines."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested connection lines system. Line number uniqueness validation works correctly, CRUD operations function as expected, and the system prevents deletion of connections with active recharges."
 
   - task: "Extended Fiber Operators"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added new fiber operators: Canalbox, Faso Net, Wayodi. Updated operator enum and statistics."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested all six fiber operators (Onatel Fibre, Orange Fibre, Telecel Fibre, Canalbox, Faso Net, Wayodi). All operators can be used to create connections and recharges."
 
   - task: "Prepaid Fiber Support"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Removed restriction on fiber being postpaid only. Both prepaid and postpaid now supported for all operator types."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested prepaid support for fiber operators. Created prepaid recharges for Canalbox, Faso Net, and Wayodi, and postpaid recharges for other fiber operators. All worked correctly."
 
   - task: "Updated Dashboard Statistics"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Enhanced dashboard stats with connection counts, mobile vs fiber breakdown, extended operator statistics."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested dashboard statistics. The API now includes connection counts (total, active, inactive), connection type statistics (mobile vs fiber), extended operator statistics with all new operators, and payment type statistics (prepaid vs postpaid)."
 
 frontend:
   - task: "Edit/Delete Forms and Modals"
