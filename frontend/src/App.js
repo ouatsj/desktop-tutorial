@@ -2281,13 +2281,13 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'zones' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
               <h2 className="text-xl font-semibold text-gray-900">Zones</h2>
               {user?.role === 'super_admin' && (
                 <button
                   onClick={() => openAddModal('zone')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                  className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
                 >
                   Nouvelle zone
                 </button>
@@ -2295,14 +2295,14 @@ const Dashboard = () => {
             </div>
 
             {zones.length === 0 ? (
-              <div className="bg-white rounded-lg shadow p-8 text-center">
+              <div className="bg-white rounded-lg shadow p-6 sm:p-8 text-center">
                 <div className="text-gray-400 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="mx-auto h-10 sm:h-12 w-10 sm:w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune zone trouvée</h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 text-sm sm:text-base">
                   Commencez par créer votre première zone pour organiser vos agences et gares.
                 </p>
                 {user?.role === 'super_admin' && (
@@ -2315,40 +2315,65 @@ const Dashboard = () => {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {zones.map((zone) => {
                   const zoneAgencies = agencies.filter(a => a.zone_id === zone.id);
                   const zoneGares = gares.filter(g => zoneAgencies.some(a => a.id === g.agency_id));
                   
                   return (
-                    <div key={zone.id} className="bg-white rounded-lg shadow p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">{zone.name}</h3>
-                        <div className="flex items-center space-x-2">
-                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                            {zoneAgencies.length} agences
-                          </span>
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                            {zoneGares.length} gares
-                          </span>
+                    <div key={zone.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 truncate flex-1 mr-2">{zone.name}</h3>
+                        <div className="flex items-center space-x-1">
                           <button
                             onClick={() => openReportModal('zone', zone.id, zone.name)}
-                            className="text-gray-400 hover:text-blue-600 transition duration-200"
+                            className="text-gray-400 hover:text-blue-600 transition duration-200 p-1"
                             title="Voir le rapport"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </button>
+                          {user?.role === 'super_admin' && (
+                            <>
+                              <button
+                                onClick={() => openEditModal('zone', zone)}
+                                className="text-gray-400 hover:text-green-600 transition duration-200 p-1"
+                                title="Modifier"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => openDeleteModal('zone', zone)}
+                                className="text-gray-400 hover:text-red-600 transition duration-200 p-1"
+                                title="Supprimer"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                       
-                      <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                          {zoneAgencies.length} agences
+                        </span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          {zoneGares.length} gares
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm text-gray-600">
                         <p><strong>Créée le:</strong> {new Date(zone.created_at).toLocaleDateString('fr-FR')}</p>
                       </div>
 
                       {zone.description && (
-                        <p className="mt-3 text-sm text-gray-600">{zone.description}</p>
+                        <p className="mt-3 text-sm text-gray-600 line-clamp-2">{zone.description}</p>
                       )}
                     </div>
                   );
