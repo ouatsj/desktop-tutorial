@@ -102,10 +102,10 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Créer une application mobile et web pour gérer les recharges de connexions internet dans les gares du Burkina Faso. Le pays est structuré en zones → agences → gares. Chaque gare enregistre les recharges mensuelles par opérateur (Orange, Telecel, Moov). Fonctionnalités : CRUD pour zones/agences/gares, enregistrement des recharges mensuelles, système d'alerte avant expiration, tableau de bord centralisé, rôles utilisateurs, mode hors-ligne avec synchronisation."
+user_problem_statement: "Système de gestion des recharges de connexions internet pour les gares du Burkina Faso avec nouvelles fonctionnalités : modification/suppression des entités, système de lignes de connexion avec numéros, nouveaux opérateurs fibre (Canalbox, Faso Net, Wayodi), prépayé pour fibre, interface mobile responsive."
 
 backend:
-  - task: "Authentication System"
+  - task: "Edit/Delete Zone Management"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -115,12 +115,12 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented JWT-based authentication with user registration, login, and role-based access control. Supports 3 roles: super_admin, zone_admin, field_agent. Password hashing with bcrypt."
+        comment: "Added PUT and DELETE endpoints for zones with proper role-based access control (super_admin only)."
       - working: true
         agent: "testing"
-        comment: "PASSED - All authentication tests successful. User registration works for all roles, login generates valid JWT tokens, protected endpoints work correctly, role-based access control implemented properly."
+        comment: "Successfully tested PUT and DELETE endpoints for zones. Role-based access control is working correctly - only super_admin can update or delete zones."
 
-  - task: "Zone Management CRUD"
+  - task: "Edit/Delete Agency Management"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -130,12 +130,12 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete CRUD operations for zones. Only super_admin can create/update/delete zones. All users can read zones."
+        comment: "Added PUT and DELETE endpoints for agencies with proper role-based access control (super_admin and zone_admin)."
       - working: true
         agent: "testing"
-        comment: "PASSED - Zone CRUD operations work correctly. Super_admin can create/update/delete zones, other roles are properly restricted. Zone retrieval works for all authenticated users."
+        comment: "Successfully tested PUT and DELETE endpoints for agencies. Role-based access control is working correctly - super_admin and zone_admin can update/delete agencies, but field_agent cannot."
 
-  - task: "Agency Management CRUD"
+  - task: "Edit/Delete Gare Management"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -145,12 +145,12 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete CRUD operations for agencies. Super_admin and zone_admin can create/update/delete agencies. Agencies are linked to zones."
+        comment: "Added PUT and DELETE endpoints for gares with proper authentication."
       - working: true
         agent: "testing"
-        comment: "PASSED - Agency CRUD operations work correctly. Super_admin and zone_admin can manage agencies, field_agent properly restricted. Hierarchical relationship with zones working correctly."
+        comment: "Successfully tested PUT and DELETE endpoints for gares. All authenticated users can update gares, and deletion works correctly."
 
-  - task: "Gare Management CRUD"
+  - task: "Connection Lines System"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -160,12 +160,12 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete CRUD operations for gares (railway stations). All authenticated users can manage gares. Gares are linked to agencies."
+        comment: "Implemented complete connection lines system with unique line numbers, CRUD operations, and status tracking. Recharges now linked to specific lines."
       - working: true
         agent: "testing"
-        comment: "PASSED - Gare CRUD operations work correctly. All authenticated users can manage gares. Hierarchical relationship with agencies working correctly."
+        comment: "Successfully tested connection lines system. Line number uniqueness validation works correctly, CRUD operations function as expected, and the system prevents deletion of connections with active recharges."
 
-  - task: "Recharge Management System"
+  - task: "Extended Fiber Operators"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -175,12 +175,12 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented recharge management with start/end dates, volume, cost, and status tracking. Supports 3 operators: Orange, Telecel, Moov. Automatic status updates (active, expiring_soon, expired)."
+        comment: "Added new fiber operators: Canalbox, Faso Net, Wayodi. Updated operator enum and statistics."
       - working: true
         agent: "testing"
-        comment: "PASSED - Recharge management system works perfectly. All 3 operators supported, automatic status updates working, CRUD operations and filtering working correctly."
+        comment: "Successfully tested all six fiber operators (Onatel Fibre, Orange Fibre, Telecel Fibre, Canalbox, Faso Net, Wayodi). All operators can be used to create connections and recharges."
 
-  - task: "Alert System"
+  - task: "Prepaid Fiber Support"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -190,12 +190,12 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented alert system that creates alerts 3 days before recharge expiration. Users can view pending alerts and dismiss them."
+        comment: "Removed restriction on fiber being postpaid only. Both prepaid and postpaid now supported for all operator types."
       - working: true
         agent: "testing"
-        comment: "PASSED - Alert system working correctly. Alerts automatically created on recharge creation, alert retrieval and dismissal working properly."
+        comment: "Successfully tested prepaid support for fiber operators. Created prepaid recharges for Canalbox, Faso Net, and Wayodi, and postpaid recharges for other fiber operators. All worked correctly."
 
-  - task: "Dashboard Statistics API"
+  - task: "Updated Dashboard Statistics"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -205,13 +205,13 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented comprehensive dashboard API with statistics: total zones/agencies/gares, recharge status counts, operator statistics, pending alerts count."
+        comment: "Enhanced dashboard stats with connection counts, mobile vs fiber breakdown, extended operator statistics."
       - working: true
         agent: "testing"
-        comment: "PASSED - Dashboard statistics API working perfectly. All counts accurate, operator statistics correct, comprehensive metrics provided."
+        comment: "Successfully tested dashboard statistics. The API now includes connection counts (total, active, inactive), connection type statistics (mobile vs fiber), extended operator statistics with all new operators, and payment type statistics (prepaid vs postpaid)."
 
 frontend:
-  - task: "Authentication UI"
+  - task: "Edit/Delete Forms and Modals"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js"
@@ -221,21 +221,21 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented login/register forms with French UI, role selection, and JWT token management. Responsive design with glassmorphism effects."
+        comment: "Added complete edit forms for zones, agencies, gares, connections. Added confirmation modals for deletions. Edit/delete buttons added to all entity cards."
 
-  - task: "Dashboard Interface"
+  - task: "Mobile Responsive Interface"
     implemented: true
     working: "NA"
-    file: "/app/frontend/src/App.js"
+    file: "/app/frontend/src/App.js, /app/frontend/src/App.css"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented comprehensive dashboard with statistics cards, operator statistics, recent alerts, and navigation tabs. Fully responsive design."
+        comment: "Redesigned interface for mobile-first approach. Updated header, navigation, cards, forms, and tables for mobile responsiveness. Added mobile-specific CSS classes."
 
-  - task: "Recharge Management UI"
+  - task: "Connection Lines Management UI"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js"
@@ -245,9 +245,9 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented recharge listing table with status badges, operator colors, and filtering. Shows gare names, expiration dates, and costs."
+        comment: "Added new Connexions tab with full CRUD interface. Connection creation form with line number generation. Recharge form now selects from available connections."
 
-  - task: "Hierarchical Structure UI"
+  - task: "Extended Fiber Operators UI"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js"
@@ -257,9 +257,9 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented zones, agencies, and gares listing with card-based layouts. Shows hierarchical relationships and statistics."
+        comment: "Updated operator selection to include Canalbox, Faso Net, Wayodi. Updated operator icons and colors. Enhanced operator statistics display."
 
-  - task: "Alert Notifications"
+  - task: "Enhanced Dashboard Mobile UI"
     implemented: true
     working: "NA"
     file: "/app/frontend/src/App.js"
@@ -269,26 +269,29 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented alert display in dashboard with dismiss functionality. Shows recent alerts with date formatting."
+        comment: "Redesigned dashboard for mobile with responsive stats cards, mobile navigation icons, improved operator statistics layout."
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 0
+  version: "2.0"
+  test_sequence: 1
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Authentication System"
-    - "Dashboard Statistics API"
-    - "Recharge Management System"
-    - "Zone Management CRUD"
+    - "Connection Lines System"
+    - "Edit/Delete Operations"
+    - "Extended Fiber Operators"
+    - "Mobile Responsive Interface"
+    - "Prepaid Fiber Support"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Implemented complete Burkina Faso railway recharge management system with MongoDB backend and React frontend. Features: JWT authentication, 3-tier hierarchy (zones→agencies→gares), recharge tracking for 3 operators, alert system, and comprehensive dashboard. Ready for backend testing to verify all API endpoints and business logic."
+    message: "Implemented major system enhancements: edit/delete functionality for all entities, connection lines system with unique numbers, extended fiber operators (Canalbox, Faso Net, Wayodi), prepaid fiber support, and complete mobile responsive interface. All new features ready for comprehensive testing."
   - agent: "testing"
-    message: "Completed comprehensive testing of all backend API endpoints. All backend features are working correctly: Authentication system with role-based access control, hierarchical structure management (zones, agencies, gares), recharge management with automatic status updates, alert system, and dashboard statistics. No issues found in the backend implementation."
+    message: "Completed comprehensive testing of all backend features. All new features are working correctly: Edit/Delete operations for zones, agencies, and gares with proper role-based access control; Connection Lines System with unique line numbers and protection against deleting connections with active recharges; Extended Fiber Operators (Canalbox, Faso Net, Wayodi) all working correctly; Prepaid Fiber Support for all operators; and Enhanced Dashboard Statistics with connection counts, mobile vs fiber breakdown, and payment type statistics. No issues found in the backend implementation."
+  - agent: "testing"
+    message: "Performed additional verification of all backend features. Authentication system is working correctly with proper JWT token validation. CRUD operations for zones, agencies, gares, and recharges are functioning as expected with appropriate role-based access control. The connection lines system correctly prevents deletion of connections with active recharges. All six fiber operators (Onatel Fibre, Orange Fibre, Telecel Fibre, Canalbox, Faso Net, Wayodi) are properly implemented and support both prepaid and postpaid payment types. The dashboard statistics API provides comprehensive data including connection counts, mobile vs fiber breakdown, and payment type statistics. The alert system correctly identifies expiring recharges and allows dismissal of alerts. All tests passed successfully with realistic Burkina Faso data."
