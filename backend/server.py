@@ -57,10 +57,6 @@ class OperatorType(str, Enum):
     MOBILE = "mobile"
     FIBRE = "fibre"
 
-class ConnectionType(str, Enum):
-    FIBRE = "fibre"
-    MOBILE = "mobile"
-
 class PaymentType(str, Enum):
     PREPAID = "prepaid"  # Prépayé (recharge)
     POSTPAID = "postpaid"  # Postpayé (abonnement mensuel)
@@ -118,41 +114,52 @@ class GareCreate(BaseModel):
     agency_id: str
     description: Optional[str] = None
 
-class ConnectionLine(BaseModel):
+class Connection(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    line_number: str  # Numéro unique de la ligne
+    line_number: str  # Numéro de ligne unique (ex: "ONG-001", "TEL-FIBRE-025")
     gare_id: str
     operator: Operator
-    connection_type: ConnectionType  # fibre ou mobile
-    payment_type: PaymentType  # prepaid ou postpaid
-    is_active: bool = True
+    operator_type: OperatorType
+    connection_type: str  # ex: "Internet", "Data", "Fibre Optique"
+    status: ConnectionStatus = ConnectionStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    created_by: str
+    description: Optional[str] = None
+    last_recharge_date: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
 
-class ConnectionLineCreate(BaseModel):
+class ConnectionCreate(BaseModel):
     line_number: str
     gare_id: str
     operator: Operator
-    connection_type: ConnectionType
-    payment_type: PaymentType
+    operator_type: OperatorType
+    connection_type: str
+    description: Optional[str] = None
 
 class Recharge(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    connection_line_id: str  # Lié à une ligne de connexion au lieu de la gare directement
-    volume: str  # e.g., "10GB", "Unlimited"
-    cost: float
+    connection_id: str  # Lié à une ligne spécifique
+    line_number: str  # Copie pour faciliter les requêtes
+    gare_id: str  # Copie pour faciliter les requêtes
+    operator: Operator
+    operator_type: OperatorType
+    payment_type: PaymentType
     start_date: datetime
     end_date: datetime
+    volume: str  # e.g., "10GB", "Unlimited", "100Mbps"
+    cost: float
     status: RechargeStatus = RechargeStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
     created_by: str
+    description: Optional[str] = None
 
 class RechargeCreate(BaseModel):
-    connection_line_id: str
-    volume: str
-    cost: float
+    connection_id: str
+    payment_type: PaymentType
     start_date: datetime
     end_date: datetime
+    volume: str
+    cost: float
+    description: Optional[str] = None
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -432,22 +439,22 @@ async def delete_gare(gare_id: str, current_user: User = Depends(get_current_use
     return {"message": "Gare deleted successfully"}
 
 # Connection routes
-@api_router.post("/connections", response_model=ConnectionLine)
-async def create_connection(connection_data: ConnectionLineCreate, current_user: User = Depends(get_current_user)):
+@api_router.post("/connections", response_model=Connection)
+async def create_connection(connection_data: ConnectionCreate, current_user: User = Depends(get_current_user)):
     # Check if line number already exists
     existing_connection = await db.connections.find_one({"line_number": connection_data.line_number})
     if existing_connection:
         raise HTTPException(status_code=400, detail="Ce numéro de ligne existe déjà")
     
-    connection = ConnectionLine(**connection_data.dict())
+    connection = Connection(**connection_data.dict())
     await db.connections.insert_one(connection.dict())
     return connection
 
-@api_router.get("/connections", response_model=List[ConnectionLine])
+@api_router.get("/connections", response_model=List[Connection])
 async def get_connections(
     gare_id: Optional[str] = None,
     operator: Optional[Operator] = None,
-    is_active: Optional[bool] = None,
+    status: Optional[ConnectionStatus] = None,
     current_user: User = Depends(get_current_user)
 ):
     query = {}
@@ -455,21 +462,21 @@ async def get_connections(
         query["gare_id"] = gare_id
     if operator:
         query["operator"] = operator.value
-    if is_active is not None:
-        query["is_active"] = is_active
+    if status:
+        query["status"] = status.value
     
     connections = await db.connections.find(query).sort("created_at", -1).to_list(1000)
-    return [ConnectionLine(**connection) for connection in connections]
+    return [Connection(**connection) for connection in connections]
 
-@api_router.get("/connections/{connection_id}", response_model=ConnectionLine)
+@api_router.get("/connections/{connection_id}", response_model=Connection)
 async def get_connection(connection_id: str, current_user: User = Depends(get_current_user)):
     connection = await db.connections.find_one({"id": connection_id})
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")
-    return ConnectionLine(**connection)
+    return Connection(**connection)
 
-@api_router.put("/connections/{connection_id}", response_model=ConnectionLine)
-async def update_connection(connection_id: str, connection_data: ConnectionLineCreate, current_user: User = Depends(get_current_user)):
+@api_router.put("/connections/{connection_id}", response_model=Connection)
+async def update_connection(connection_id: str, connection_data: ConnectionCreate, current_user: User = Depends(get_current_user)):
     # Check if new line number conflicts with existing one (except current)
     if connection_data.line_number:
         existing_connection = await db.connections.find_one({
@@ -488,13 +495,13 @@ async def update_connection(connection_id: str, connection_data: ConnectionLineC
         raise HTTPException(status_code=404, detail="Connection not found")
     
     connection = await db.connections.find_one({"id": connection_id})
-    return ConnectionLine(**connection)
+    return Connection(**connection)
 
 @api_router.delete("/connections/{connection_id}")
 async def delete_connection(connection_id: str, current_user: User = Depends(get_current_user)):
     # Check if connection has active recharges
     active_recharges = await db.recharges.count_documents({
-        "connection_line_id": connection_id,
+        "connection_id": connection_id,
         "status": {"$in": ["active", "expiring_soon"]}
     })
     
@@ -510,16 +517,31 @@ async def delete_connection(connection_id: str, current_user: User = Depends(get
 # Recharge routes (updated)
 @api_router.post("/recharges", response_model=Recharge)
 async def create_recharge(recharge_data: RechargeCreate, current_user: User = Depends(get_current_user)):
-    # Get connection line info
-    connection_line = await db.connections.find_one({"id": recharge_data.connection_line_id})
-    if not connection_line:
-        raise HTTPException(status_code=404, detail="Connection line not found")
+    # Get connection info
+    connection = await db.connections.find_one({"id": recharge_data.connection_id})
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
     
     recharge_dict = recharge_data.dict()
     recharge_dict["created_by"] = current_user.id
+    recharge_dict["line_number"] = connection["line_number"]
+    recharge_dict["gare_id"] = connection["gare_id"]
+    recharge_dict["operator"] = connection["operator"]
+    recharge_dict["operator_type"] = connection["operator_type"]
     
     recharge = Recharge(**recharge_dict)
     await db.recharges.insert_one(recharge.dict())
+    
+    # Update connection with last recharge info
+    await db.connections.update_one(
+        {"id": recharge_data.connection_id},
+        {
+            "$set": {
+                "last_recharge_date": recharge.start_date,
+                "expiry_date": recharge.end_date
+            }
+        }
+    )
     
     # Create alert for this recharge
     alert_date = recharge.end_date - timedelta(days=3)
@@ -527,7 +549,7 @@ async def create_recharge(recharge_data: RechargeCreate, current_user: User = De
         recharge_id=recharge.id,
         alert_date=alert_date,
         days_before_expiry=3,
-        message=f"Recharge for line {connection_line['line_number']} expires in 3 days"
+        message=f"Ligne {connection['line_number']} ({recharge.operator.value}) expire dans 3 jours"
     )
     await db.alerts.insert_one(alert.dict())
     
@@ -842,8 +864,8 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     total_recharges = await db.recharges.count_documents({})
     
     # Get connection statistics
-    active_connections = await db.connections.count_documents({"is_active": True})
-    inactive_connections = await db.connections.count_documents({"is_active": False})
+    active_connections = await db.connections.count_documents({"status": "active"})
+    inactive_connections = await db.connections.count_documents({"status": "inactive"})
     
     # Get recharge statistics
     active_recharges = await db.recharges.count_documents({"status": "active"})
@@ -859,7 +881,7 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     operator_stats = []
     for operator in all_operators:
         count = await db.recharges.count_documents({"operator": operator, "status": "active"})
-        connections_count = await db.connections.count_documents({"operator": operator, "is_active": True})
+        connections_count = await db.connections.count_documents({"operator": operator, "status": "active"})
         total_cost = 0
         recharges = await db.recharges.find({"operator": operator}).to_list(1000)
         total_cost = sum([r["cost"] for r in recharges])
