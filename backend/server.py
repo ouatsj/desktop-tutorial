@@ -755,53 +755,62 @@ async def get_zone_report(zone_id: str, current_user: User = Depends(get_current
     agency_ids = [a["id"] for a in agencies]
     
     # Get all gares in these agencies
-    gares = await db.gares.find({"agency_id": {"$in": agency_ids}}).to_list(1000)
-    gare_ids = [g["id"] for g in gares]
+    gares = []
+    gare_ids = []
+    if agency_ids:
+        gares = await db.gares.find({"agency_id": {"$in": agency_ids}}).to_list(1000)
+        gare_ids = [g["id"] for g in gares]
     
     # Get all recharges for gares in this zone
-    recharges = await db.recharges.find({"gare_id": {"$in": gare_ids}}).sort("created_at", -1).to_list(1000)
+    recharges = []
+    if gare_ids:
+        recharges = await db.recharges.find({"gare_id": {"$in": gare_ids}}).sort("created_at", -1).to_list(1000)
     
     # Calculate statistics
     total_recharges = len(recharges)
-    active_recharges = len([r for r in recharges if r["status"] == "active"])
-    expired_recharges = len([r for r in recharges if r["status"] == "expired"])
-    expiring_recharges = len([r for r in recharges if r["status"] == "expiring_soon"])
-    total_cost = sum([r["cost"] for r in recharges])
+    active_recharges = len([r for r in recharges if r.get("status") == "active"])
+    expired_recharges = len([r for r in recharges if r.get("status") == "expired"])
+    expiring_recharges = len([r for r in recharges if r.get("status") == "expiring_soon"])
+    total_cost = sum([r.get("cost", 0) for r in recharges])
     
-    # Group by operator, agency, and gare
+    # Operator statistics
     operator_stats = {}
-    agency_stats = {}
     for recharge in recharges:
-        op = recharge["operator"]
-        gare_id = recharge["gare_id"]
-        gare = next((g for g in gares if g["id"] == gare_id), None)
-        agency_id = gare["agency_id"] if gare else None
+        operator = recharge.get("operator", "Unknown")
+        if operator not in operator_stats:
+            operator_stats[operator] = {"count": 0, "cost": 0, "active": 0}
+        operator_stats[operator]["count"] += 1
+        operator_stats[operator]["cost"] += recharge.get("cost", 0)
+        if recharge.get("status") == "active":
+            operator_stats[operator]["active"] += 1
+    
+    # Agency statistics
+    agency_stats = {}
+    for agency in agencies:
+        agency_id = agency["id"]
+        agency_gares = [g for g in gares if g["agency_id"] == agency_id]
+        agency_gare_ids = [g["id"] for g in agency_gares]
+        agency_recharges = [r for r in recharges if r.get("gare_id") in agency_gare_ids]
         
-        if op not in operator_stats:
-            operator_stats[op] = {"count": 0, "cost": 0, "active": 0}
-        operator_stats[op]["count"] += 1
-        operator_stats[op]["cost"] += recharge["cost"]
-        if recharge["status"] == "active":
-            operator_stats[op]["active"] += 1
-            
-        if agency_id and agency_id not in agency_stats:
-            agency_name = next((a["name"] for a in agencies if a["id"] == agency_id), "Unknown")
-            agency_stats[agency_id] = {"name": agency_name, "count": 0, "cost": 0, "active": 0, "gares": 0}
-        if agency_id:
-            agency_stats[agency_id]["count"] += 1
-            agency_stats[agency_id]["cost"] += recharge["cost"]
-            if recharge["status"] == "active":
-                agency_stats[agency_id]["active"] += 1
-    
-    # Count gares per agency
-    for agency_id in agency_stats:
-        agency_stats[agency_id]["gares"] = len([g for g in gares if g["agency_id"] == agency_id])
-    
+        agency_stats[agency_id] = {
+            "name": agency["name"],
+            "gares_count": len(agency_gares),
+            "recharges_count": len(agency_recharges),
+            "total_cost": sum([r.get("cost", 0) for r in agency_recharges]),
+            "active_recharges": len([r for r in agency_recharges if r.get("status") == "active"])
+        }
+
+    # Clean data for JSON serialization
+    clean_zone = {k: v for k, v in zone.items() if k != "_id"}
+    clean_agencies = [{k: v for k, v in a.items() if k != "_id"} for a in agencies]
+    clean_gares = [{k: v for k, v in g.items() if k != "_id"} for g in gares]
+    clean_recharges = [{k: v for k, v in r.items() if k != "_id"} for r in recharges]
+
     return {
-        "zone": dict(zone) if zone else None,
-        "agencies": [dict(a) for a in agencies],
-        "gares": [dict(g) for g in gares],
-        "recharges": [dict(r) for r in recharges],
+        "zone": clean_zone,
+        "agencies": clean_agencies,
+        "gares": clean_gares,
+        "recharges": clean_recharges,
         "statistics": {
             "total_agencies": len(agencies),
             "total_gares": len(gares),
@@ -813,7 +822,7 @@ async def get_zone_report(zone_id: str, current_user: User = Depends(get_current
             "operator_stats": operator_stats,
             "agency_stats": agency_stats
         },
-        "generated_at": datetime.utcnow()
+        "generated_at": datetime.utcnow().isoformat()
     }
 
 # WhatsApp sharing endpoint
