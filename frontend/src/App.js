@@ -1396,14 +1396,19 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
             value={formData.cost}
             onChange={(e) => setFormData({...formData, cost: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={formData.payment_type === 'postpaid' ? 'Ex: 50000 (mensuel)' : 'Ex: 25000'}
-            min="0"
-            step="100"
+            placeholder={formData.payment_type === 'postpaid' ? 'Ex: 50000 (mensuel)' : 'Ex: 25, 50, 1050, 25000'}
+            min="1"
+            step="1"
             required
           />
           {formData.payment_type === 'postpaid' && (
             <p className="text-xs text-gray-500 mt-1">
               💡 Pour les abonnements mensuels, entrez le coût mensuel
+            </p>
+          )}
+          {!formData.payment_type && (
+            <p className="text-xs text-gray-500 mt-1">
+              💡 Tous les montants sont acceptés : 25, 50, 1050, 5000, 25000, etc.
             </p>
           )}
         </div>
