@@ -660,10 +660,10 @@ async def get_gare_report(gare_id: str, current_user: User = Depends(get_current
             operator_stats[op]["active"] += 1
     
     return {
-        "gare": gare,
-        "agency": agency,
-        "zone": zone,
-        "recharges": recharges,
+        "gare": dict(gare) if gare else None,
+        "agency": dict(agency) if agency else None,
+        "zone": dict(zone) if zone else None,
+        "recharges": [dict(r) for r in recharges],
         "statistics": {
             "total_recharges": total_recharges,
             "active_recharges": active_recharges,
