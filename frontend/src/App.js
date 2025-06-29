@@ -1482,33 +1482,96 @@ const ReportsModal = ({ isOpen, onClose, type, entityId, entityName }) => {
   const exportReport = () => {
     if (!report) return;
 
-    // Create CSV content
-    const csvContent = [
-      ['Rapport', type.toUpperCase(), entityName],
+    // Create detailed CSV content with consumption and costs
+    const csvData = [
+      ['RAPPORT ' + type.toUpperCase() + ' - ' + entityName],
       ['Généré le', new Date(report.generated_at).toLocaleDateString('fr-FR')],
       [],
-      ['Statistiques générales'],
-      ['Recharges totales', report.statistics.total_recharges],
+      ['=== STATISTIQUES GÉNÉRALES ==='],
+      ['Total zones', type === 'zone' ? '1' : report.statistics.total_zones || 'N/A'],
+      ['Total agences', report.statistics.total_agencies || report.statistics.total_gares ? '1' : 'N/A'],
+      ['Total gares', report.statistics.total_gares || '1'],
+      ['Total recharges', report.statistics.total_recharges],
       ['Recharges actives', report.statistics.active_recharges],
       ['Recharges expirées', report.statistics.expired_recharges],
       ['Recharges expirant bientôt', report.statistics.expiring_recharges],
-      ['Coût total (FCFA)', report.statistics.total_cost],
       [],
-      ['Statistiques par opérateur'],
-      ['Opérateur', 'Nombre', 'Coût total', 'Actives'],
-      ...Object.entries(report.statistics.operator_stats || {}).map(([op, stats]) => [
-        op, stats.count, stats.cost, stats.active
-      ])
+      ['=== ANALYSE FINANCIÈRE ==='],
+      ['Coût total des recharges', report.statistics.total_cost.toLocaleString() + ' FCFA'],
+      ['Coût moyen par recharge', report.statistics.total_recharges > 0 ? Math.round(report.statistics.total_cost / report.statistics.total_recharges).toLocaleString() + ' FCFA' : '0 FCFA'],
+      ['Investissement actuel', report.statistics.active_recharges > 0 ? Math.round((report.statistics.active_recharges / report.statistics.total_recharges) * report.statistics.total_cost).toLocaleString() + ' FCFA' : '0 FCFA'],
+      [],
+      ['=== RÉPARTITION PAR OPÉRATEUR ==='],
+      ['Opérateur', 'Recharges', 'Coût Total (FCFA)', 'Recharges Actives', 'Taux d\'utilisation (%)']
     ];
 
-    const csvString = csvContent.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvString], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
+    // Add operator statistics
+    if (report.statistics.operator_stats) {
+      Object.entries(report.statistics.operator_stats).forEach(([operator, stats]) => {
+        const utilizationRate = stats.count > 0 ? Math.round((stats.active / stats.count) * 100) : 0;
+        csvData.push([
+          operator,
+          stats.count,
+          stats.cost.toLocaleString(),
+          stats.active,
+          utilizationRate + '%'
+        ]);
+      });
+    }
+
+    // Add gare-level details for agency and zone reports
+    if ((type === 'agency' || type === 'zone') && report.statistics.gare_stats) {
+      csvData.push([]);
+      csvData.push(['=== DÉTAIL PAR GARE ===']);
+      csvData.push(['Gare', 'Recharges', 'Coût Total (FCFA)', 'Recharges Actives', 'Efficacité (%)']);
+      
+      Object.entries(report.statistics.gare_stats).forEach(([gareId, stats]) => {
+        const efficiency = stats.count > 0 ? Math.round((stats.active / stats.count) * 100) : 0;
+        csvData.push([
+          stats.name,
+          stats.count,
+          stats.cost.toLocaleString(),
+          stats.active,
+          efficiency + '%'
+        ]);
+      });
+    }
+
+    // Add monthly consumption analysis if recharges exist
+    if (report.recharges && report.recharges.length > 0) {
+      csvData.push([]);
+      csvData.push(['=== ANALYSE DE CONSOMMATION MENSUELLE ===']);
+      
+      const monthlyData = {};
+      report.recharges.forEach(recharge => {
+        const month = new Date(recharge.start_date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+        if (!monthlyData[month]) {
+          monthlyData[month] = { count: 0, cost: 0, volume: [] };
+        }
+        monthlyData[month].count++;
+        monthlyData[month].cost += recharge.cost;
+        monthlyData[month].volume.push(recharge.volume);
+      });
+
+      csvData.push(['Mois', 'Nombre de recharges', 'Coût total (FCFA)', 'Coût moyen (FCFA)', 'Volumes principaux']);
+      Object.entries(monthlyData).forEach(([month, data]) => {
+        const avgCost = Math.round(data.cost / data.count);
+        const topVolumes = [...new Set(data.volume)].slice(0, 3).join(', ');
+        csvData.push([month, data.count, data.cost.toLocaleString(), avgCost.toLocaleString(), topVolumes]);
+      });
+    }
+
+    // Convert to CSV string
+    const csvContent = csvData.map(row => 
+      row.map(cell => `"${cell}"`).join(',')
+    ).join('\n');
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    link.href = url;
-    link.download = `rapport-${type}-${entityName}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.href = URL.createObjectURL(blob);
+    link.download = `rapport-detaille-${type}-${entityName}-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    URL.revokeObjectURL(url);
   };
 
   if (!isOpen) return null;
