@@ -798,10 +798,10 @@ async def get_zone_report(zone_id: str, current_user: User = Depends(get_current
         agency_stats[agency_id]["gares"] = len([g for g in gares if g["agency_id"] == agency_id])
     
     return {
-        "zone": zone,
-        "agencies": agencies,
-        "gares": gares,
-        "recharges": recharges,
+        "zone": dict(zone) if zone else None,
+        "agencies": [dict(a) for a in agencies],
+        "gares": [dict(g) for g in gares],
+        "recharges": [dict(r) for r in recharges],
         "statistics": {
             "total_agencies": len(agencies),
             "total_gares": len(gares),
