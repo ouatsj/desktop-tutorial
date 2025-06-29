@@ -2317,7 +2317,7 @@ const Dashboard = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Gestion des recharges</h2>
-              {connections.length > 0 && (
+              {connections.filter(c => c.status === 'active').length > 0 && (
                 <button
                   onClick={() => openAddModal('recharge')}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
