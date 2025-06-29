@@ -2391,7 +2391,6 @@ const Dashboard = () => {
                   </button>
                 )}
               </div>
-              </div>
             ) : recharges.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
                 <div className="text-gray-400 mb-4">
