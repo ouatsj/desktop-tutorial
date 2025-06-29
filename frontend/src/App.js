@@ -1281,24 +1281,28 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Ligne de connexion *
           </label>
-          <select
+          <SearchableSelect
+            options={connectionOptions}
             value={formData.connection_id}
-            onChange={(e) => handleConnectionChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">Sélectionner une ligne</option>
-            {connections.filter(c => c.status === 'active').map((connection) => (
-              <option key={connection.id} value={connection.id}>
-                {connection.line_number} - {connection.operator} ({connection.connection_type})
-              </option>
-            ))}
-          </select>
+            onChange={(value) => {
+              handleConnectionChange(value);
+            }}
+            placeholder="Rechercher et sélectionner une ligne"
+            displayField="name"
+            valueField="id"
+          />
           {selectedConnection && (
-            <div className="mt-2 p-2 bg-gray-50 rounded-lg text-sm">
-              <p><strong>Opérateur:</strong> {selectedConnection.operator}</p>
-              <p><strong>Type:</strong> {selectedConnection.operator_type === 'mobile' ? '📱 Mobile' : '🌐 Fibre'}</p>
-              <p><strong>Service:</strong> {selectedConnection.connection_type}</p>
+            <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm border border-blue-200">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <p><strong>📍 Gare:</strong> {gares.find(g => g.id === selectedConnection.gare_id)?.name || 'Inconnue'}</p>
+                  <p><strong>📞 Ligne:</strong> {selectedConnection.line_number}</p>
+                </div>
+                <div className="flex-1">
+                  <p><strong>📡 Opérateur:</strong> {selectedConnection.operator}</p>
+                  <p><strong>🔧 Type:</strong> {selectedConnection.operator_type === 'mobile' ? '📱 Mobile' : '🌐 Fibre'}</p>
+                </div>
+              </div>
             </div>
           )}
         </div>
