@@ -664,6 +664,68 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
   );
 };
 
+// Composant de sélection avec saisie
+const SearchableSelect = ({ options, value, onChange, placeholder, displayField = "name", valueField = "id" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredOptions, setFilteredOptions] = useState(options);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = options.filter(option => 
+        option[displayField].toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredOptions(filtered);
+    } else {
+      setFilteredOptions(options);
+    }
+  }, [searchTerm, options, displayField]);
+
+  const selectedOption = options.find(option => option[valueField] === value);
+
+  const handleSelect = (option) => {
+    onChange(option[valueField]);
+    setIsOpen(false);
+    setSearchTerm('');
+  };
+
+  return (
+    <div className="relative">
+      <div
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer bg-white"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {selectedOption ? selectedOption[displayField] : placeholder}
+        <span className="float-right text-gray-400">▼</span>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border-b border-gray-200 focus:outline-none"
+            placeholder="Rechercher..."
+            autoFocus
+          />
+          <div className="max-h-48 overflow-y-auto">
+            {filteredOptions.map((option) => (
+              <div
+                key={option[valueField]}
+                className="px-3 py-2 hover:bg-blue-50 cursor-pointer"
+                onClick={() => handleSelect(option)}
+              >
+                {option[displayField]}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Form components
 const ConnectionForm = ({ gares, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
