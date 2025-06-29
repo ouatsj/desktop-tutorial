@@ -551,19 +551,14 @@ const EditConnectionForm = ({ connection, gares, onClose, onSuccess }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Gare *
           </label>
-          <select
+          <SearchableSelect
+            options={gares}
             value={formData.gare_id}
-            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">Sélectionner une gare</option>
-            {gares.map((gare) => (
-              <option key={gare.id} value={gare.id}>
-                {gare.name}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setFormData({...formData, gare_id: value})}
+            placeholder="Sélectionner une gare"
+            displayField="name"
+            valueField="id"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
