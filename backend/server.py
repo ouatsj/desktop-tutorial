@@ -724,10 +724,10 @@ async def get_agency_report(agency_id: str, current_user: User = Depends(get_cur
             gare_stats[gare_id]["active"] += 1
     
     return {
-        "agency": agency,
-        "zone": zone,
-        "gares": gares,
-        "recharges": recharges,
+        "agency": dict(agency) if agency else None,
+        "zone": dict(zone) if zone else None,
+        "gares": [dict(g) for g in gares],
+        "recharges": [dict(r) for r in recharges],
         "statistics": {
             "total_gares": len(gares),
             "total_recharges": total_recharges,
