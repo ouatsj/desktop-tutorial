@@ -1198,7 +1198,7 @@ const GareForm = ({ agencies, onClose, onSuccess }) => {
   );
 };
 
-const RechargeForm = ({ connections, onClose, onSuccess }) => {
+const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     connection_id: '',
     payment_type: '',
@@ -1260,6 +1260,18 @@ const RechargeForm = ({ connections, onClose, onSuccess }) => {
       volume: ''
     });
   };
+
+  // Préparer les options de connexion avec les noms des gares
+  const connectionOptions = connections
+    .filter(c => c.status === 'active')
+    .map(connection => {
+      const gare = gares.find(g => g.id === connection.gare_id);
+      return {
+        id: connection.id,
+        name: `${connection.line_number} - ${gare?.name || 'Gare inconnue'} - ${connection.operator} (${connection.connection_type})`,
+        connection: connection
+      };
+    });
 
   return (
     <div>
