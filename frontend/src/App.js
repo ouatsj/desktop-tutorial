@@ -1857,6 +1857,23 @@ const Dashboard = () => {
     }
   };
 
+  const toggleConnectionStatus = async (connectionId, newStatus) => {
+    try {
+      const connection = connections.find(c => c.id === connectionId);
+      if (!connection) return;
+
+      await axios.put(`${API}/connections/${connectionId}`, {
+        ...connection,
+        status: newStatus
+      });
+      
+      fetchData(); // Refresh data to show updated status
+    } catch (error) {
+      console.error('Error updating connection status:', error);
+      alert(error.response?.data?.detail || 'Erreur lors de la mise à jour du statut');
+    }
+  };
+
   const openReportModal = (type, entityId, entityName) => {
     setReportConfig({ type, entityId, entityName });
     setShowReportsModal(true);
