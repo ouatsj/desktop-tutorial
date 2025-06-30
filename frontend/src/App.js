@@ -2550,7 +2550,7 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {recharges.map((recharge) => {
+                      {filteredRecharges.map((recharge) => {
                         const gare = gares.find(g => g.id === recharge.gare_id);
                         const connection = connections.find(c => c.id === recharge.connection_id);
                         return (
