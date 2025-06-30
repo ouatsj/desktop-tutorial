@@ -1830,6 +1830,28 @@ const Dashboard = () => {
     }
   };
 
+  // Logique de filtrage des recharges
+  const filteredRecharges = recharges.filter(recharge => {
+    const connection = connections.find(c => c.id === recharge.connection_id);
+    const gare = gares.find(g => g.id === recharge.gare_id);
+    
+    // Filtrage par terme de recherche
+    const searchMatch = !rechargeSearchTerm || (
+      (connection?.line_number?.toLowerCase().includes(rechargeSearchTerm.toLowerCase())) ||
+      (gare?.name?.toLowerCase().includes(rechargeSearchTerm.toLowerCase())) ||
+      (recharge.operator?.toLowerCase().includes(rechargeSearchTerm.toLowerCase())) ||
+      (recharge.volume?.toLowerCase().includes(rechargeSearchTerm.toLowerCase()))
+    );
+    
+    // Filtrage par opérateur
+    const operatorMatch = !selectedOperatorFilter || recharge.operator === selectedOperatorFilter;
+    
+    // Filtrage par statut
+    const statusMatch = !selectedStatusFilter || recharge.status === selectedStatusFilter;
+    
+    return searchMatch && operatorMatch && statusMatch;
+  });
+
   const openAddModal = (type) => {
     setModalType(type);
     setShowAddModal(true);
