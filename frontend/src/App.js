@@ -2354,7 +2354,7 @@ const Dashboard = () => {
 
         {activeTab === 'recharges' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-xl font-semibold text-gray-900">Gestion des recharges</h2>
               {connections.filter(c => c.status === 'active').length > 0 && (
                 <button
@@ -2365,6 +2365,82 @@ const Dashboard = () => {
                 </button>
               )}
             </div>
+
+            {/* Champ de recherche automatique */}
+            {recharges.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      🔍 Rechercher une ligne de connexion
+                    </label>
+                    <input
+                      type="text"
+                      value={rechargeSearchTerm}
+                      onChange={(e) => setRechargeSearchTerm(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Tapez le numéro de ligne, nom de gare, ou opérateur..."
+                    />
+                  </div>
+                  <div className="flex-shrink-0">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      📱 Filtrer par opérateur
+                    </label>
+                    <select
+                      value={selectedOperatorFilter}
+                      onChange={(e) => setSelectedOperatorFilter(e.target.value)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Tous les opérateurs</option>
+                      <option value="Orange">Orange</option>
+                      <option value="Telecel">Telecel</option>
+                      <option value="Moov">Moov</option>
+                      <option value="Onatel Fibre">Onatel Fibre</option>
+                      <option value="Orange Fibre">Orange Fibre</option>
+                      <option value="Telecel Fibre">Telecel Fibre</option>
+                      <option value="Canalbox">Canalbox</option>
+                      <option value="Faso Net">Faso Net</option>
+                      <option value="Wayodi">Wayodi</option>
+                    </select>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      📊 Filtrer par statut
+                    </label>
+                    <select
+                      value={selectedStatusFilter}
+                      onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Tous les statuts</option>
+                      <option value="active">Actif</option>
+                      <option value="expiring_soon">Expire bientôt</option>
+                      <option value="expired">Expiré</option>
+                    </select>
+                  </div>
+                  {(rechargeSearchTerm || selectedOperatorFilter || selectedStatusFilter) && (
+                    <div className="flex-shrink-0 flex items-end">
+                      <button
+                        onClick={() => {
+                          setRechargeSearchTerm('');
+                          setSelectedOperatorFilter('');
+                          setSelectedStatusFilter('');
+                        }}
+                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200"
+                        title="Effacer tous les filtres"
+                      >
+                        ✖️ Effacer
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {(rechargeSearchTerm || selectedOperatorFilter || selectedStatusFilter) && (
+                  <div className="mt-3 text-sm text-gray-600">
+                    {filteredRecharges.length} recharge(s) trouvée(s) sur {recharges.length} au total
+                  </div>
+                )}
+              </div>
+            )}
 
             {connections.filter(c => c.status === 'active').length === 0 ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
