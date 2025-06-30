@@ -1793,11 +1793,6 @@ const Dashboard = () => {
   const [selectedOperatorFilter, setSelectedOperatorFilter] = useState('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
 
-  // États pour les filtres de recherche des recharges
-  const [rechargeSearchTerm, setRechargeSearchTerm] = useState('');
-  const [selectedOperatorFilter, setSelectedOperatorFilter] = useState('');
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
-
   const { user, logout } = useAuth();
 
   useEffect(() => {
