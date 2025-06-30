@@ -659,8 +659,100 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
   );
 };
 
-// Composant de sélection avec saisie
-const SearchableSelect = ({ options, value, onChange, placeholder, displayField = "name", valueField = "id" }) => {
+// Composant de recherche unifiée
+const UnifiedSearchBar = ({ data, onFilteredResults, searchOptions, placeholder }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState(searchOptions[0]?.value || '');
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      onFilteredResults(data);
+      return;
+    }
+
+    const filtered = data.filter(item => {
+      const searchValue = searchTerm.toLowerCase();
+      
+      switch (searchType) {
+        case 'all':
+          return Object.values(item).some(value => 
+            value && value.toString().toLowerCase().includes(searchValue)
+          );
+        case 'line':
+          return item.line_number?.toLowerCase().includes(searchValue);
+        case 'gare':
+          return item.gare_name?.toLowerCase().includes(searchValue);
+        case 'operator':
+          return item.operator?.toLowerCase().includes(searchValue);
+        case 'status':
+          return item.status?.toLowerCase().includes(searchValue);
+        case 'volume':
+          return item.volume?.toLowerCase().includes(searchValue);
+        case 'cost':
+          return item.cost?.toString().includes(searchValue);
+        default:
+          return Object.values(item).some(value => 
+            value && value.toString().toLowerCase().includes(searchValue)
+          );
+      }
+    });
+
+    onFilteredResults(filtered);
+  }, [searchTerm, searchType, data, onFilteredResults]);
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    onFilteredResults(data);
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-shrink-0">
+          <select
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-l-lg sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+          >
+            {searchOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.icon} {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-r-lg sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={placeholder}
+          />
+          {searchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Effacer la recherche"
+            >
+              ✖️
+            </button>
+          )}
+        </div>
+      </div>
+      
+      {searchTerm && (
+        <div className="mt-3 text-sm text-gray-600">
+          <span className="font-medium">🔍 Recherche :</span> "{searchTerm}" dans{' '}
+          <span className="font-medium">
+            {searchOptions.find(opt => opt.value === searchType)?.label}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState(options);
