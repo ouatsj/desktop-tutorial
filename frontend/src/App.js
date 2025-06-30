@@ -1885,6 +1885,10 @@ const Dashboard = () => {
   const [selectedOperatorFilter, setSelectedOperatorFilter] = useState('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
 
+  // États pour les données filtrées
+  const [filteredConnections, setFilteredConnections] = useState([]);
+  const [filteredRecharges, setFilteredRecharges] = useState([]);
+
   const { user, logout } = useAuth();
 
   useEffect(() => {
