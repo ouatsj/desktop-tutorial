@@ -1788,6 +1788,11 @@ const Dashboard = () => {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [reportConfig, setReportConfig] = useState({ type: '', entityId: '', entityName: '' });
 
+  // États pour les filtres de recherche des recharges
+  const [rechargeSearchTerm, setRechargeSearchTerm] = useState('');
+  const [selectedOperatorFilter, setSelectedOperatorFilter] = useState('');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
+
   const { user, logout } = useAuth();
 
   useEffect(() => {
