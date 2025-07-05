@@ -348,6 +348,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Detailed code review confirms that the SearchableSelect component is correctly implemented and is being used in the RechargeForm component (lines 1347-1357). The component supports all required functionality: search by line number, gare name, and operator; case-insensitive search; partial matching; 'no results' handling with appropriate messaging; results counter showing 'X résultat(s) trouvé(s)'; and enhanced placeholder text. The connectionOptions are properly prepared with all the necessary data for searching (lines 1276-1288)."
+      - working: true
+        agent: "testing"
+        comment: "Code review confirms that the gare names are now correctly displayed in the connection selection when creating a new recharge. The RechargeForm component properly looks up the gare name from the gares array using the connection's gare_id (lines 1282-1286). The connection options are prepared with the actual gare names in the format '[Line Number] - [Real Gare Name] - [Operator] ([Connection Type])' (line 1293). The SearchableSelect component also supports searching by gare name (lines 35-41). The selected connection details also display the correct gare name (lines 1374-1376). This implementation ensures that connections now show actual gare names instead of 'Gare inconnue'."
 
 metadata:
   created_by: "main_agent"
