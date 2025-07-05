@@ -1258,7 +1258,7 @@ const GareForm = ({ agencies, onClose, onSuccess }) => {
   );
 };
 
-const RechargeForm = ({ connections, onClose, onSuccess }) => {
+const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     connection_id: '',
     payment_type: '',
@@ -1271,6 +1271,21 @@ const RechargeForm = ({ connections, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedConnection, setSelectedConnection] = useState(null);
+
+  // Préparer les options de connexion avec les noms des gares
+  const connectionOptions = connections
+    .filter(c => c.status === 'active')
+    .map(connection => {
+      const gare = gares.find(g => g.id === connection.gare_id);
+      return {
+        id: connection.id,
+        name: `${connection.line_number} - ${gare?.name || 'Gare inconnue'} - ${connection.operator} (${connection.connection_type})`,
+        connection: connection,
+        line_number: connection.line_number,
+        operator: connection.operator,
+        gare_name: gare?.name || 'Gare inconnue'
+      };
+    });
 
   // Set default dates (start: today, end: 30 days from today)
   React.useEffect(() => {
