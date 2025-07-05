@@ -362,9 +362,7 @@ test_plan:
     - "Extended Fiber Operators"
     - "Mobile Responsive Interface"
     - "Prepaid Fiber Support"
-    - "Enhanced Connection Selection in Recharge Form"
-  stuck_tasks:
-    - "Enhanced Connection Selection in Recharge Form"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
