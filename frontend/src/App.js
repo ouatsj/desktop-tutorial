@@ -551,14 +551,19 @@ const EditConnectionForm = ({ connection, gares, onClose, onSuccess }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Gare *
           </label>
-          <SearchableSelect
-            options={gares}
+          <select
             value={formData.gare_id}
-            onChange={(value) => setFormData({...formData, gare_id: value})}
-            placeholder="Sélectionner une gare"
-            displayField="name"
-            valueField="id"
-          />
+            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une gare</option>
+            {gares.map((gare) => (
+              <option key={gare.id} value={gare.id}>
+                {gare.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -659,160 +664,6 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
   );
 };
 
-// Composant de recherche unifiée
-const UnifiedSearchBar = ({ data, onFilteredResults, searchOptions, placeholder }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState(searchOptions[0]?.value || '');
-
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      onFilteredResults(data);
-      return;
-    }
-
-    const filtered = data.filter(item => {
-      const searchValue = searchTerm.toLowerCase();
-      
-      switch (searchType) {
-        case 'all':
-          return Object.values(item).some(value => 
-            value && value.toString().toLowerCase().includes(searchValue)
-          );
-        case 'line':
-          return item.line_number?.toLowerCase().includes(searchValue);
-        case 'gare':
-          return item.gare_name?.toLowerCase().includes(searchValue);
-        case 'operator':
-          return item.operator?.toLowerCase().includes(searchValue);
-        case 'status':
-          return item.status?.toLowerCase().includes(searchValue);
-        case 'volume':
-          return item.volume?.toLowerCase().includes(searchValue);
-        case 'cost':
-          return item.cost?.toString().includes(searchValue);
-        default:
-          return Object.values(item).some(value => 
-            value && value.toString().toLowerCase().includes(searchValue)
-          );
-      }
-    });
-
-    onFilteredResults(filtered);
-  }, [searchTerm, searchType, data, onFilteredResults]);
-
-  const clearSearch = () => {
-    setSearchTerm('');
-    onFilteredResults(data);
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow p-4 mb-6">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-shrink-0">
-          <select
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-l-lg sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-          >
-            {searchOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.icon} {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-r-lg sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={placeholder}
-          />
-          {searchTerm && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              title="Effacer la recherche"
-            >
-              ✖️
-            </button>
-          )}
-        </div>
-      </div>
-      
-      {searchTerm && (
-        <div className="mt-3 text-sm text-gray-600">
-          <span className="font-medium">🔍 Recherche :</span> "{searchTerm}" dans{' '}
-          <span className="font-medium">
-            {searchOptions.find(opt => opt.value === searchType)?.label}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredOptions, setFilteredOptions] = useState(options);
-
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = options.filter(option => 
-        option[displayField].toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredOptions(filtered);
-    } else {
-      setFilteredOptions(options);
-    }
-  }, [searchTerm, options, displayField]);
-
-  const selectedOption = options.find(option => option[valueField] === value);
-
-  const handleSelect = (option) => {
-    onChange(option[valueField]);
-    setIsOpen(false);
-    setSearchTerm('');
-  };
-
-  return (
-    <div className="relative">
-      <div
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer bg-white"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {selectedOption ? selectedOption[displayField] : placeholder}
-        <span className="float-right text-gray-400">▼</span>
-      </div>
-      
-      {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border-b border-gray-200 focus:outline-none"
-            placeholder="Rechercher..."
-            autoFocus
-          />
-          <div className="max-h-48 overflow-y-auto">
-            {filteredOptions.map((option) => (
-              <div
-                key={option[valueField]}
-                className="px-3 py-2 hover:bg-blue-50 cursor-pointer"
-                onClick={() => handleSelect(option)}
-              >
-                {option[displayField]}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 // Form components
 const ConnectionForm = ({ gares, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -872,14 +723,19 @@ const ConnectionForm = ({ gares, onClose, onSuccess }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Gare *
           </label>
-          <SearchableSelect
-            options={gares}
+          <select
             value={formData.gare_id}
-            onChange={(value) => setFormData({...formData, gare_id: value})}
-            placeholder="Sélectionner une gare"
-            displayField="name"
-            valueField="id"
-          />
+            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une gare</option>
+            {gares.map((gare) => (
+              <option key={gare.id} value={gare.id}>
+                {gare.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -1290,7 +1146,7 @@ const GareForm = ({ agencies, onClose, onSuccess }) => {
   );
 };
 
-const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
+const RechargeForm = ({ connections, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     connection_id: '',
     payment_type: '',
@@ -1353,18 +1209,6 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
     });
   };
 
-  // Préparer les options de connexion avec les noms des gares
-  const connectionOptions = connections
-    .filter(c => c.status === 'active')
-    .map(connection => {
-      const gare = gares.find(g => g.id === connection.gare_id);
-      return {
-        id: connection.id,
-        name: `${connection.line_number} - ${gare?.name || 'Gare inconnue'} - ${connection.operator} (${connection.connection_type})`,
-        connection: connection
-      };
-    });
-
   return (
     <div>
       <h3 className="text-lg font-semibold mb-4">Recharger une ligne de connexion</h3>
@@ -1373,28 +1217,24 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Ligne de connexion *
           </label>
-          <SearchableSelect
-            options={connectionOptions}
+          <select
             value={formData.connection_id}
-            onChange={(value) => {
-              handleConnectionChange(value);
-            }}
-            placeholder="Rechercher et sélectionner une ligne"
-            displayField="name"
-            valueField="id"
-          />
+            onChange={(e) => handleConnectionChange(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une ligne</option>
+            {connections.filter(c => c.status === 'active').map((connection) => (
+              <option key={connection.id} value={connection.id}>
+                {connection.line_number} - {connection.operator} ({connection.connection_type})
+              </option>
+            ))}
+          </select>
           {selectedConnection && (
-            <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm border border-blue-200">
-              <div className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <p><strong>📍 Gare:</strong> {gares.find(g => g.id === selectedConnection.gare_id)?.name || 'Inconnue'}</p>
-                  <p><strong>📞 Ligne:</strong> {selectedConnection.line_number}</p>
-                </div>
-                <div className="flex-1">
-                  <p><strong>📡 Opérateur:</strong> {selectedConnection.operator}</p>
-                  <p><strong>🔧 Type:</strong> {selectedConnection.operator_type === 'mobile' ? '📱 Mobile' : '🌐 Fibre'}</p>
-                </div>
-              </div>
+            <div className="mt-2 p-2 bg-gray-50 rounded-lg text-sm">
+              <p><strong>Opérateur:</strong> {selectedConnection.operator}</p>
+              <p><strong>Type:</strong> {selectedConnection.operator_type === 'mobile' ? '📱 Mobile' : '🌐 Fibre'}</p>
+              <p><strong>Service:</strong> {selectedConnection.connection_type}</p>
             </div>
           )}
         </div>
@@ -1488,19 +1328,14 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
             value={formData.cost}
             onChange={(e) => setFormData({...formData, cost: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder={formData.payment_type === 'postpaid' ? 'Ex: 50000 (mensuel)' : 'Ex: 25, 50, 1050, 25000'}
-            min="1"
-            step="1"
+            placeholder={formData.payment_type === 'postpaid' ? 'Ex: 50000 (mensuel)' : 'Ex: 25000'}
+            min="0"
+            step="100"
             required
           />
           {formData.payment_type === 'postpaid' && (
             <p className="text-xs text-gray-500 mt-1">
               💡 Pour les abonnements mensuels, entrez le coût mensuel
-            </p>
-          )}
-          {!formData.payment_type && (
-            <p className="text-xs text-gray-500 mt-1">
-              💡 Tous les montants sont acceptés : 25, 50, 1050, 5000, 25000, etc.
             </p>
           )}
         </div>
@@ -1595,96 +1430,33 @@ const ReportsModal = ({ isOpen, onClose, type, entityId, entityName }) => {
   const exportReport = () => {
     if (!report) return;
 
-    // Create detailed CSV content with consumption and costs
-    const csvData = [
-      ['RAPPORT ' + type.toUpperCase() + ' - ' + entityName],
+    // Create CSV content
+    const csvContent = [
+      ['Rapport', type.toUpperCase(), entityName],
       ['Généré le', new Date(report.generated_at).toLocaleDateString('fr-FR')],
       [],
-      ['=== STATISTIQUES GÉNÉRALES ==='],
-      ['Total zones', type === 'zone' ? '1' : report.statistics.total_zones || 'N/A'],
-      ['Total agences', report.statistics.total_agencies || report.statistics.total_gares ? '1' : 'N/A'],
-      ['Total gares', report.statistics.total_gares || '1'],
-      ['Total recharges', report.statistics.total_recharges],
+      ['Statistiques générales'],
+      ['Recharges totales', report.statistics.total_recharges],
       ['Recharges actives', report.statistics.active_recharges],
       ['Recharges expirées', report.statistics.expired_recharges],
       ['Recharges expirant bientôt', report.statistics.expiring_recharges],
+      ['Coût total (FCFA)', report.statistics.total_cost],
       [],
-      ['=== ANALYSE FINANCIÈRE ==='],
-      ['Coût total des recharges', report.statistics.total_cost.toLocaleString() + ' FCFA'],
-      ['Coût moyen par recharge', report.statistics.total_recharges > 0 ? Math.round(report.statistics.total_cost / report.statistics.total_recharges).toLocaleString() + ' FCFA' : '0 FCFA'],
-      ['Investissement actuel', report.statistics.active_recharges > 0 ? Math.round((report.statistics.active_recharges / report.statistics.total_recharges) * report.statistics.total_cost).toLocaleString() + ' FCFA' : '0 FCFA'],
-      [],
-      ['=== RÉPARTITION PAR OPÉRATEUR ==='],
-      ['Opérateur', 'Recharges', 'Coût Total (FCFA)', 'Recharges Actives', 'Taux d\'utilisation (%)']
+      ['Statistiques par opérateur'],
+      ['Opérateur', 'Nombre', 'Coût total', 'Actives'],
+      ...Object.entries(report.statistics.operator_stats || {}).map(([op, stats]) => [
+        op, stats.count, stats.cost, stats.active
+      ])
     ];
 
-    // Add operator statistics
-    if (report.statistics.operator_stats) {
-      Object.entries(report.statistics.operator_stats).forEach(([operator, stats]) => {
-        const utilizationRate = stats.count > 0 ? Math.round((stats.active / stats.count) * 100) : 0;
-        csvData.push([
-          operator,
-          stats.count,
-          stats.cost.toLocaleString(),
-          stats.active,
-          utilizationRate + '%'
-        ]);
-      });
-    }
-
-    // Add gare-level details for agency and zone reports
-    if ((type === 'agency' || type === 'zone') && report.statistics.gare_stats) {
-      csvData.push([]);
-      csvData.push(['=== DÉTAIL PAR GARE ===']);
-      csvData.push(['Gare', 'Recharges', 'Coût Total (FCFA)', 'Recharges Actives', 'Efficacité (%)']);
-      
-      Object.entries(report.statistics.gare_stats).forEach(([gareId, stats]) => {
-        const efficiency = stats.count > 0 ? Math.round((stats.active / stats.count) * 100) : 0;
-        csvData.push([
-          stats.name,
-          stats.count,
-          stats.cost.toLocaleString(),
-          stats.active,
-          efficiency + '%'
-        ]);
-      });
-    }
-
-    // Add monthly consumption analysis if recharges exist
-    if (report.recharges && report.recharges.length > 0) {
-      csvData.push([]);
-      csvData.push(['=== ANALYSE DE CONSOMMATION MENSUELLE ===']);
-      
-      const monthlyData = {};
-      report.recharges.forEach(recharge => {
-        const month = new Date(recharge.start_date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
-        if (!monthlyData[month]) {
-          monthlyData[month] = { count: 0, cost: 0, volume: [] };
-        }
-        monthlyData[month].count++;
-        monthlyData[month].cost += recharge.cost;
-        monthlyData[month].volume.push(recharge.volume);
-      });
-
-      csvData.push(['Mois', 'Nombre de recharges', 'Coût total (FCFA)', 'Coût moyen (FCFA)', 'Volumes principaux']);
-      Object.entries(monthlyData).forEach(([month, data]) => {
-        const avgCost = Math.round(data.cost / data.count);
-        const topVolumes = [...new Set(data.volume)].slice(0, 3).join(', ');
-        csvData.push([month, data.count, data.cost.toLocaleString(), avgCost.toLocaleString(), topVolumes]);
-      });
-    }
-
-    // Convert to CSV string
-    const csvContent = csvData.map(row => 
-      row.map(cell => `"${cell}"`).join(',')
-    ).join('\n');
-
-    // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvString = csvContent.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `rapport-detaille-${type}-${entityName}-${new Date().toISOString().split('T')[0]}.csv`;
+    link.href = url;
+    link.download = `rapport-${type}-${entityName}-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   if (!isOpen) return null;
@@ -1880,23 +1652,11 @@ const Dashboard = () => {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [reportConfig, setReportConfig] = useState({ type: '', entityId: '', entityName: '' });
 
-  // États pour les filtres de recherche
-  const [connectionSearchTerm, setConnectionSearchTerm] = useState('');
-  const [connectionSearchType, setConnectionSearchType] = useState('all');
-  const [rechargeSearchTerm, setRechargeSearchTerm] = useState('');
-  const [rechargeSearchType, setRechargeSearchType] = useState('all');
-
   const { user, logout } = useAuth();
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Initialiser les données filtrées
-  useEffect(() => {
-    setFilteredConnections(connections);
-    setFilteredRecharges(recharges);
-  }, [connections, recharges]);
 
   const fetchData = async () => {
     try {
@@ -1923,28 +1683,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  // Logique de filtrage des recharges
-  const filteredRecharges = recharges.filter(recharge => {
-    const connection = connections.find(c => c.id === recharge.connection_id);
-    const gare = gares.find(g => g.id === recharge.gare_id);
-    
-    // Filtrage par terme de recherche
-    const searchMatch = !rechargeSearchTerm || (
-      (connection?.line_number?.toLowerCase().includes(rechargeSearchTerm.toLowerCase())) ||
-      (gare?.name?.toLowerCase().includes(rechargeSearchTerm.toLowerCase())) ||
-      (recharge.operator?.toLowerCase().includes(rechargeSearchTerm.toLowerCase())) ||
-      (recharge.volume?.toLowerCase().includes(rechargeSearchTerm.toLowerCase()))
-    );
-    
-    // Filtrage par opérateur
-    const operatorMatch = !selectedOperatorFilter || recharge.operator === selectedOperatorFilter;
-    
-    // Filtrage par statut
-    const statusMatch = !selectedStatusFilter || recharge.status === selectedStatusFilter;
-    
-    return searchMatch && operatorMatch && statusMatch;
-  });
 
   const openAddModal = (type) => {
     setModalType(type);
@@ -1980,23 +1718,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error deleting item:', error);
       alert(error.response?.data?.detail || 'Erreur lors de la suppression');
-    }
-  };
-
-  const toggleConnectionStatus = async (connectionId, newStatus) => {
-    try {
-      const connection = connections.find(c => c.id === connectionId);
-      if (!connection) return;
-
-      await axios.put(`${API}/connections/${connectionId}`, {
-        ...connection,
-        status: newStatus
-      });
-      
-      fetchData(); // Refresh data to show updated status
-    } catch (error) {
-      console.error('Error updating connection status:', error);
-      alert(error.response?.data?.detail || 'Erreur lors de la mise à jour du statut');
     }
   };
 
@@ -2316,61 +2037,6 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Barre de recherche unifiée pour les connexions */}
-            {connections.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-shrink-0">
-                    <select
-                      value={connectionSearchType}
-                      onChange={(e) => setConnectionSearchType(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                    >
-                      <option value="all">🔍 Tout rechercher</option>
-                      <option value="line">📞 Numéro de ligne</option>
-                      <option value="gare">🏢 Nom de gare</option>
-                      <option value="operator">📱 Opérateur</option>
-                      <option value="status">📊 Statut</option>
-                      <option value="type">🔧 Type de connexion</option>
-                    </select>
-                  </div>
-                  
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={connectionSearchTerm}
-                      onChange={(e) => setConnectionSearchTerm(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Tapez votre recherche..."
-                    />
-                    {connectionSearchTerm && (
-                      <button
-                        onClick={() => setConnectionSearchTerm('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        title="Effacer la recherche"
-                      >
-                        ✖️
-                      </button>
-                    )}
-                  </div>
-                </div>
-                
-                {connectionSearchTerm && (
-                  <div className="mt-3 text-sm text-gray-600">
-                    <span className="font-medium">🔍 Recherche :</span> "{connectionSearchTerm}" dans{' '}
-                    <span className="font-medium">
-                      {connectionSearchType === 'all' ? 'Tout' :
-                       connectionSearchType === 'line' ? 'Numéro de ligne' :
-                       connectionSearchType === 'gare' ? 'Nom de gare' :
-                       connectionSearchType === 'operator' ? 'Opérateur' :
-                       connectionSearchType === 'status' ? 'Statut' : 'Type de connexion'}
-                    </span>
-                    {' - '}<span className="font-medium">{filteredConnections.length}</span> résultat(s) trouvé(s)
-                  </div>
-                )}
-              </div>
-            )}
-
             {gares.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
                 <div className="text-gray-400 mb-4">
@@ -2480,28 +2146,6 @@ const Dashboard = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex items-center space-x-2">
-                                {connection.status === 'inactive' && (
-                                  <button
-                                    onClick={() => toggleConnectionStatus(connection.id, 'active')}
-                                    className="text-green-600 hover:text-green-900"
-                                    title="Activer"
-                                  >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  </button>
-                                )}
-                                {connection.status === 'active' && (
-                                  <button
-                                    onClick={() => toggleConnectionStatus(connection.id, 'inactive')}
-                                    className="text-orange-600 hover:text-orange-900"
-                                    title="Désactiver"
-                                  >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                  </button>
-                                )}
                                 <button
                                   onClick={() => openEditModal('connection', connection)}
                                   className="text-indigo-600 hover:text-indigo-900"
@@ -2535,9 +2179,9 @@ const Dashboard = () => {
 
         {activeTab === 'recharges' && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Gestion des recharges</h2>
-              {connections.filter(c => c.status === 'active').length > 0 && (
+              {connections.length > 0 && (
                 <button
                   onClick={() => openAddModal('recharge')}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
@@ -2547,106 +2191,17 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Champ de recherche automatique */}
-            {recharges.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      🔍 Rechercher une ligne de connexion
-                    </label>
-                    <input
-                      type="text"
-                      value={rechargeSearchTerm}
-                      onChange={(e) => setRechargeSearchTerm(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Tapez le numéro de ligne, nom de gare, ou opérateur..."
-                    />
-                  </div>
-                  <div className="flex-shrink-0">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      📱 Filtrer par opérateur
-                    </label>
-                    <select
-                      value={selectedOperatorFilter}
-                      onChange={(e) => setSelectedOperatorFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Tous les opérateurs</option>
-                      <option value="Orange">Orange</option>
-                      <option value="Telecel">Telecel</option>
-                      <option value="Moov">Moov</option>
-                      <option value="Onatel Fibre">Onatel Fibre</option>
-                      <option value="Orange Fibre">Orange Fibre</option>
-                      <option value="Telecel Fibre">Telecel Fibre</option>
-                      <option value="Canalbox">Canalbox</option>
-                      <option value="Faso Net">Faso Net</option>
-                      <option value="Wayodi">Wayodi</option>
-                    </select>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      📊 Filtrer par statut
-                    </label>
-                    <select
-                      value={selectedStatusFilter}
-                      onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Tous les statuts</option>
-                      <option value="active">Actif</option>
-                      <option value="expiring_soon">Expire bientôt</option>
-                      <option value="expired">Expiré</option>
-                    </select>
-                  </div>
-                  {(rechargeSearchTerm || selectedOperatorFilter || selectedStatusFilter) && (
-                    <div className="flex-shrink-0 flex items-end">
-                      <button
-                        onClick={() => {
-                          setRechargeSearchTerm('');
-                          setSelectedOperatorFilter('');
-                          setSelectedStatusFilter('');
-                        }}
-                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200"
-                        title="Effacer tous les filtres"
-                      >
-                        ✖️ Effacer
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {(rechargeSearchTerm || selectedOperatorFilter || selectedStatusFilter) && (
-                  <div className="mt-3 text-sm text-gray-600">
-                    {filteredRecharges.length} recharge(s) trouvée(s) sur {recharges.length} au total
-                  </div>
-                )}
-              </div>
-            )}
-
-            {connections.filter(c => c.status === 'active').length === 0 ? (
+            {connections.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
                 <div className="text-gray-400 mb-4">
                   <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {connections.length === 0 ? 'Aucune ligne de connexion disponible' : 'Aucune ligne de connexion active'}
-                </h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune ligne de connexion disponible</h3>
                 <p className="text-gray-600">
-                  {connections.length === 0 
-                    ? 'Vous devez d\'abord créer des lignes de connexion avant de pouvoir ajouter des recharges.'
-                    : 'Activez des lignes de connexion existantes ou créez-en de nouvelles pour pouvoir ajouter des recharges.'
-                  }
+                  Vous devez d'abord créer des lignes de connexion avant de pouvoir ajouter des recharges.
                 </p>
-                {connections.length === 0 && (
-                  <button
-                    onClick={() => setActiveTab('connexions')}
-                    className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-                  >
-                    Créer une ligne de connexion
-                  </button>
-                )}
               </div>
             ) : recharges.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
@@ -2699,7 +2254,7 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredRecharges.map((recharge) => {
+                      {recharges.map((recharge) => {
                         const gare = gares.find(g => g.id === recharge.gare_id);
                         const connection = connections.find(c => c.id === recharge.connection_id);
                         return (
@@ -3084,7 +2639,7 @@ const Dashboard = () => {
             {modalType === 'agency' && <AgencyForm zones={zones} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
             {modalType === 'gare' && <GareForm agencies={agencies} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
             {modalType === 'connection' && <ConnectionForm gares={gares} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
-            {modalType === 'recharge' && <RechargeForm connections={connections} gares={gares} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
+            {modalType === 'recharge' && <RechargeForm connections={connections} onClose={() => setShowAddModal(false)} onSuccess={fetchData} />}
           </div>
         </div>
       )}
