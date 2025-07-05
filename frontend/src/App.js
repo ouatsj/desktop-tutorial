@@ -1895,6 +1895,12 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Initialiser les données filtrées
+  useEffect(() => {
+    setFilteredConnections(connections);
+    setFilteredRecharges(recharges);
+  }, [connections, recharges]);
+
   const fetchData = async () => {
     try {
       const [statsRes, alertsRes, rechargesRes, zonesRes, agenciesRes, garesRes, connectionsRes] = await Promise.all([
