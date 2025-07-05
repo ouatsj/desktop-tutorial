@@ -1273,19 +1273,31 @@ const RechargeForm = ({ connections = [], gares = [], onClose, onSuccess }) => {
   const [selectedConnection, setSelectedConnection] = useState(null);
 
   // Préparer les options de connexion avec les noms des gares
-  const connectionOptions = connections
-    .filter(c => c.status === 'active')
-    .map(connection => {
-      const gare = gares?.find(g => g.id === connection.gare_id);
-      return {
-        id: connection.id,
-        name: `${connection.line_number} - ${gare?.name || 'Gare inconnue'} - ${connection.operator} (${connection.connection_type})`,
-        connection: connection,
-        line_number: connection.line_number,
-        operator: connection.operator,
-        gare_name: gare?.name || 'Gare inconnue'
-      };
-    });
+  const connectionOptions = React.useMemo(() => {
+    if (!connections || connections.length === 0) return [];
+    
+    return connections
+      .filter(c => c.status === 'active')
+      .map(connection => {
+        // Chercher la gare correspondante avec vérification robuste
+        let gare = null;
+        if (gares && gares.length > 0) {
+          gare = gares.find(g => g.id === connection.gare_id);
+        }
+        
+        // Si pas de gare trouvée, utiliser le nom du line_number ou une indication
+        const gareName = gare?.name || `Gare (${connection.line_number})`;
+        
+        return {
+          id: connection.id,
+          name: `${connection.line_number} - ${gareName} - ${connection.operator} (${connection.connection_type})`,
+          connection: connection,
+          line_number: connection.line_number,
+          operator: connection.operator,
+          gare_name: gareName
+        };
+      });
+  }, [connections, gares]);
 
   // Set default dates (start: today, end: 30 days from today)
   React.useEffect(() => {
