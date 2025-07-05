@@ -330,6 +330,21 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Tested the SearchableSelect component in the connection creation form. The component allows typing to filter options and provides a better user experience for selecting from large lists."
+        
+  - task: "Enhanced Connection Selection in Recharge Form"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/App.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented SearchableSelect component with enhanced search capabilities for connection selection in the recharge form."
+      - working: false
+        agent: "testing"
+        comment: "Code review shows that while the SearchableSelect component has been implemented with all required functionality (search by line number, gare name, operator; case-insensitive search; partial matching; 'no results' handling; results counter; enhanced placeholder), it is not being used in the RechargeForm component. The RechargeForm still uses a standard select element for connection selection."
 
 metadata:
   created_by: "main_agent"
