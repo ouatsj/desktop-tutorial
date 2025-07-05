@@ -1359,7 +1359,7 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
             <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm border border-blue-200">
               <div className="flex items-center space-x-4">
                 <div className="flex-1">
-                  <p><strong>📍 Gare:</strong> {gares.find(g => g.id === selectedConnection.gare_id)?.name || 'Inconnue'}</p>
+                  <p><strong>📍 Gare:</strong> {gares?.find(g => g.id === selectedConnection.gare_id)?.name || 'Inconnue'}</p>
                   <p><strong>📞 Ligne:</strong> {selectedConnection.line_number}</p>
                 </div>
                 <div className="flex-1">
