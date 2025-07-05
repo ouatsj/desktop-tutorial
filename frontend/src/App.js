@@ -1724,6 +1724,14 @@ const Dashboard = () => {
 
   // Fonctions de filtrage pour les recharges
   const filteredRecharges = recharges.filter(recharge => {
+    // Filtrage par sous-onglet (actives vs expirées)
+    const statusFilter = rechargeSubTab === 'actives' 
+      ? (recharge.status === 'active' || recharge.status === 'expiring_soon')
+      : recharge.status === 'expired';
+    
+    if (!statusFilter) return false;
+    
+    // Filtrage par terme de recherche
     if (!rechargeSearchTerm.trim()) return true;
     
     const searchValue = rechargeSearchTerm.toLowerCase();
