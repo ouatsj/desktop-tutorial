@@ -1633,6 +1633,330 @@ const ReportsModal = ({ isOpen, onClose, type, entityId, entityName }) => {
   );
 };
 
+// Composants d'édition
+const EditConnectionForm = ({ connection, gares, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    line_number: connection.line_number || '',
+    gare_id: connection.gare_id || '',
+    operator: connection.operator || '',
+    operator_type: connection.operator_type || '',
+    connection_type: connection.connection_type || '',
+    description: connection.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await axios.put(`${API}/connections/${connection.id}`, formData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Modifier la ligne de connexion</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Numéro de ligne *
+          </label>
+          <input
+            type="text"
+            value={formData.line_number}
+            onChange={(e) => setFormData({...formData, line_number: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Gare *
+          </label>
+          <select
+            value={formData.gare_id}
+            onChange={(e) => setFormData({...formData, gare_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une gare</option>
+            {gares.map((gare) => (
+              <option key={gare.id} value={gare.id}>
+                {gare.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Type d'opérateur *
+          </label>
+          <select
+            value={formData.operator_type}
+            onChange={(e) => {
+              const type = e.target.value;
+              setFormData({
+                ...formData,
+                operator_type: type,
+                operator: '',
+                connection_type: type === 'mobile' ? 'Internet Mobile' : 'Fibre Optique'
+              });
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Choisir le type</option>
+            <option value="mobile">📱 Mobile</option>
+            <option value="fibre">🌐 Fibre</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Opérateur *
+          </label>
+          <select
+            value={formData.operator}
+            onChange={(e) => setFormData({...formData, operator: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner un opérateur</option>
+            {formData.operator_type === 'mobile' ? (
+              ['Orange', 'Telecel', 'Moov'].map(op => (
+                <option key={op} value={op}>{op}</option>
+              ))
+            ) : formData.operator_type === 'fibre' ? (
+              ['Onatel Fibre', 'Orange Fibre', 'Telecel Fibre', 'Canalbox', 'Faso Net', 'Wayodi'].map(op => (
+                <option key={op} value={op}>{op}</option>
+              ))
+            ) : null}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+          />
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Modification...' : 'Modifier'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const EditRechargeForm = ({ recharge, connections, gares, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    connection_id: recharge.connection_id || '',
+    payment_type: recharge.payment_type || '',
+    start_date: recharge.start_date ? new Date(recharge.start_date).toISOString().split('T')[0] : '',
+    end_date: recharge.end_date ? new Date(recharge.end_date).toISOString().split('T')[0] : '',
+    volume: recharge.volume || '',
+    cost: recharge.cost || '',
+    description: recharge.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const submitData = {
+        ...formData,
+        cost: parseFloat(formData.cost),
+        start_date: new Date(formData.start_date).toISOString(),
+        end_date: new Date(formData.end_date).toISOString()
+      };
+      await axios.put(`${API}/recharges/${recharge.id}`, submitData);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.detail || 'Erreur lors de la modification');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectedConnection = connections.find(c => c.id === formData.connection_id);
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">Modifier la recharge</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Ligne de connexion *
+          </label>
+          <select
+            value={formData.connection_id}
+            onChange={(e) => setFormData({...formData, connection_id: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner une ligne</option>
+            {connections.filter(c => c.status === 'active').map((connection) => {
+              const gare = gares.find(g => g.id === connection.gare_id);
+              return (
+                <option key={connection.id} value={connection.id}>
+                  {connection.line_number} - {gare?.name || 'Gare inconnue'} - {connection.operator}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Type de paiement *
+          </label>
+          <select
+            value={formData.payment_type}
+            onChange={(e) => setFormData({...formData, payment_type: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionner le type</option>
+            <option value="prepaid">Prépayé</option>
+            <option value="postpaid">Postpayé</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Date de début *
+          </label>
+          <input
+            type="date"
+            value={formData.start_date}
+            onChange={(e) => setFormData({...formData, start_date: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Date de fin *
+          </label>
+          <input
+            type="date"
+            value={formData.end_date}
+            onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Volume/Débit *
+          </label>
+          <input
+            type="text"
+            value={formData.volume}
+            onChange={(e) => setFormData({...formData, volume: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Ex: 10GB, 100Mbps"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Coût (FCFA) *
+          </label>
+          <input
+            type="number"
+            value={formData.cost}
+            onChange={(e) => setFormData({...formData, cost: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min="1"
+            step="1"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+          />
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+          >
+            {loading ? 'Modification...' : 'Modifier'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 // Dashboard component
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
