@@ -1652,6 +1652,12 @@ const Dashboard = () => {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [reportConfig, setReportConfig] = useState({ type: '', entityId: '', entityName: '' });
 
+  // États pour la recherche unifiée
+  const [connectionSearchTerm, setConnectionSearchTerm] = useState('');
+  const [connectionSearchType, setConnectionSearchType] = useState('all');
+  const [rechargeSearchTerm, setRechargeSearchTerm] = useState('');
+  const [rechargeSearchType, setRechargeSearchType] = useState('all');
+
   const { user, logout } = useAuth();
 
   useEffect(() => {
