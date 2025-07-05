@@ -1276,7 +1276,7 @@ const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
   const connectionOptions = connections
     .filter(c => c.status === 'active')
     .map(connection => {
-      const gare = gares.find(g => g.id === connection.gare_id);
+      const gare = gares?.find(g => g.id === connection.gare_id);
       return {
         id: connection.id,
         name: `${connection.line_number} - ${gare?.name || 'Gare inconnue'} - ${connection.operator} (${connection.connection_type})`,
