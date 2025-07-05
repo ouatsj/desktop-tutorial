@@ -2223,7 +2223,7 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {connections.map((connection) => {
+                      {filteredConnections.map((connection) => {
                         const gare = gares.find(g => g.id === connection.gare_id);
                         const connectionRecharges = recharges.filter(r => r.connection_id === connection.id);
                         const lastRecharge = connectionRecharges.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
