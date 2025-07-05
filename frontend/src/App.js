@@ -1880,14 +1880,11 @@ const Dashboard = () => {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [reportConfig, setReportConfig] = useState({ type: '', entityId: '', entityName: '' });
 
-  // États pour les filtres de recherche des recharges
+  // États pour les filtres de recherche
+  const [connectionSearchTerm, setConnectionSearchTerm] = useState('');
+  const [connectionSearchType, setConnectionSearchType] = useState('all');
   const [rechargeSearchTerm, setRechargeSearchTerm] = useState('');
-  const [selectedOperatorFilter, setSelectedOperatorFilter] = useState('');
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
-
-  // États pour les données filtrées
-  const [filteredConnections, setFilteredConnections] = useState([]);
-  const [filteredRecharges, setFilteredRecharges] = useState([]);
+  const [rechargeSearchType, setRechargeSearchType] = useState('all');
 
   const { user, logout } = useAuth();
 
