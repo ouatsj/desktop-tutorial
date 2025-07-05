@@ -3075,6 +3075,7 @@ const Dashboard = () => {
             {modalType === 'agency' && <EditAgencyForm agency={selectedItem} zones={zones} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
             {modalType === 'gare' && <EditGareForm gare={selectedItem} agencies={agencies} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
             {modalType === 'connection' && <EditConnectionForm connection={selectedItem} gares={gares} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
+            {modalType === 'recharge' && <EditRechargeForm recharge={selectedItem} connections={connections} gares={gares} onClose={() => {setShowEditModal(false); setSelectedItem(null);}} onSuccess={fetchData} />}
           </div>
         </div>
       )}
