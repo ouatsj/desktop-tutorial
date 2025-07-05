@@ -1658,6 +1658,9 @@ const Dashboard = () => {
   const [rechargeSearchTerm, setRechargeSearchTerm] = useState('');
   const [rechargeSearchType, setRechargeSearchType] = useState('all');
 
+  // États pour les sous-onglets des recharges
+  const [rechargeSubTab, setRechargeSubTab] = useState('actives'); // 'actives' ou 'expires'
+
   const { user, logout } = useAuth();
 
   useEffect(() => {
