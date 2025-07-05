@@ -1690,6 +1690,68 @@ const Dashboard = () => {
     }
   };
 
+  // Fonctions de filtrage pour les connexions
+  const filteredConnections = connections.filter(connection => {
+    if (!connectionSearchTerm.trim()) return true;
+    
+    const searchValue = connectionSearchTerm.toLowerCase();
+    const gare = gares.find(g => g.id === connection.gare_id);
+    
+    switch (connectionSearchType) {
+      case 'all':
+        return connection.line_number?.toLowerCase().includes(searchValue) ||
+               gare?.name?.toLowerCase().includes(searchValue) ||
+               connection.operator?.toLowerCase().includes(searchValue) ||
+               connection.status?.toLowerCase().includes(searchValue) ||
+               connection.connection_type?.toLowerCase().includes(searchValue);
+      case 'line':
+        return connection.line_number?.toLowerCase().includes(searchValue);
+      case 'gare':
+        return gare?.name?.toLowerCase().includes(searchValue);
+      case 'operator':
+        return connection.operator?.toLowerCase().includes(searchValue);
+      case 'status':
+        return connection.status?.toLowerCase().includes(searchValue);
+      case 'type':
+        return connection.connection_type?.toLowerCase().includes(searchValue);
+      default:
+        return true;
+    }
+  });
+
+  // Fonctions de filtrage pour les recharges
+  const filteredRecharges = recharges.filter(recharge => {
+    if (!rechargeSearchTerm.trim()) return true;
+    
+    const searchValue = rechargeSearchTerm.toLowerCase();
+    const connection = connections.find(c => c.id === recharge.connection_id);
+    const gare = gares.find(g => g.id === recharge.gare_id);
+    
+    switch (rechargeSearchType) {
+      case 'all':
+        return connection?.line_number?.toLowerCase().includes(searchValue) ||
+               gare?.name?.toLowerCase().includes(searchValue) ||
+               recharge.operator?.toLowerCase().includes(searchValue) ||
+               recharge.status?.toLowerCase().includes(searchValue) ||
+               recharge.volume?.toLowerCase().includes(searchValue) ||
+               recharge.cost?.toString().includes(searchValue);
+      case 'line':
+        return connection?.line_number?.toLowerCase().includes(searchValue);
+      case 'gare':
+        return gare?.name?.toLowerCase().includes(searchValue);
+      case 'operator':
+        return recharge.operator?.toLowerCase().includes(searchValue);
+      case 'status':
+        return recharge.status?.toLowerCase().includes(searchValue);
+      case 'volume':
+        return recharge.volume?.toLowerCase().includes(searchValue);
+      case 'cost':
+        return recharge.cost?.toString().includes(searchValue);
+      default:
+        return true;
+    }
+  });
+
   const openAddModal = (type) => {
     setModalType(type);
     setShowAddModal(true);
