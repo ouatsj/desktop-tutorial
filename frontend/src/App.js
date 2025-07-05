@@ -2105,6 +2105,61 @@ const Dashboard = () => {
               )}
             </div>
 
+            {/* Barre de recherche unifiée pour les connexions */}
+            {connections.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-shrink-0">
+                    <select
+                      value={connectionSearchType}
+                      onChange={(e) => setConnectionSearchType(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                    >
+                      <option value="all">🔍 Tout rechercher</option>
+                      <option value="line">📞 Numéro de ligne</option>
+                      <option value="gare">🏢 Nom de gare</option>
+                      <option value="operator">📱 Opérateur</option>
+                      <option value="status">📊 Statut</option>
+                      <option value="type">🔧 Type de connexion</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={connectionSearchTerm}
+                      onChange={(e) => setConnectionSearchTerm(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Tapez votre recherche..."
+                    />
+                    {connectionSearchTerm && (
+                      <button
+                        onClick={() => setConnectionSearchTerm('')}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        title="Effacer la recherche"
+                      >
+                        ✖️
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                {connectionSearchTerm && (
+                  <div className="mt-3 text-sm text-gray-600">
+                    <span className="font-medium">🔍 Recherche :</span> "{connectionSearchTerm}" dans{' '}
+                    <span className="font-medium">
+                      {connectionSearchType === 'all' ? 'Tout' :
+                       connectionSearchType === 'line' ? 'Numéro de ligne' :
+                       connectionSearchType === 'gare' ? 'Nom de gare' :
+                       connectionSearchType === 'operator' ? 'Opérateur' :
+                       connectionSearchType === 'status' ? 'Statut' : 'Type de connexion'}
+                    </span>
+                    {' - '}<span className="font-medium">{filteredConnections.length}</span> résultat(s) sur {connections.length}
+                  </div>
+                )}
+              </div>
+            )}
+
             {gares.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-8 text-center">
                 <div className="text-gray-400 mb-4">
