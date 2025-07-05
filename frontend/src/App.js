@@ -1258,7 +1258,7 @@ const GareForm = ({ agencies, onClose, onSuccess }) => {
   );
 };
 
-const RechargeForm = ({ connections, gares, onClose, onSuccess }) => {
+const RechargeForm = ({ connections = [], gares = [], onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     connection_id: '',
     payment_type: '',
