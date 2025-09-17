@@ -619,6 +619,7 @@ const EditConnectionForm = ({ connection, gares, onClose, onSuccess }) => {
     operator: connection?.operator || '',
     operator_type: connection?.operator_type || '',
     connection_type: connection?.connection_type || '',
+    service_type: connection?.service_type || 'autre',
     description: connection?.description || ''
   });
   const [loading, setLoading] = useState(false);
