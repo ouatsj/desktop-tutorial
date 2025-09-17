@@ -946,6 +946,61 @@ const ConnectionForm = ({ gares, onClose, onSuccess }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
+            Usage du numéro *
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setFormData({...formData, service_type: 'ticket'})}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.service_type === 'ticket'
+                  ? 'border-green-500 bg-green-50 text-green-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              🎫 Facturation Ticket
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({...formData, service_type: 'courrier'})}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.service_type === 'courrier'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              📮 Courrier
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({...formData, service_type: 'bagage'})}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.service_type === 'bagage'
+                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              🧳 Bagage
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({...formData, service_type: 'autre'})}
+              className={`p-3 border rounded-lg text-center transition duration-200 ${
+                formData.service_type === 'autre'
+                  ? 'border-purple-500 bg-purple-50 text-purple-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              ⚙️ Autre
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Spécifiez l'usage principal de cette ligne de connexion
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Description
           </label>
           <textarea
