@@ -76,6 +76,12 @@ class AlertStatus(str, Enum):
     SENT = "sent"
     DISMISSED = "dismissed"
 
+class ServiceType(str, Enum):
+    TICKET = "ticket"
+    COURRIER = "courrier"  
+    BAGAGE = "bagage"
+    AUTRE = "autre"
+
 # Models
 class Zone(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
