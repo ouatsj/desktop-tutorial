@@ -784,6 +784,7 @@ const ConnectionForm = ({ gares, onClose, onSuccess }) => {
     operator: '',
     operator_type: '',
     connection_type: '',
+    service_type: 'autre',
     description: ''
   });
   const [loading, setLoading] = useState(false);
