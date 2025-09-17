@@ -2620,7 +2620,22 @@ const Dashboard = () => {
                               {connection.line_number}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {gare?.name || 'Gare inconnue'}
+                              <div className="flex flex-col">
+                                <span className="font-medium">{gare?.name || 'Gare inconnue'}</span>
+                                {connection?.service_type && (
+                                  <span className={`text-xs px-2 py-1 rounded-full mt-1 w-fit ${
+                                    connection.service_type === 'ticket' ? 'bg-green-100 text-green-700' :
+                                    connection.service_type === 'courrier' ? 'bg-blue-100 text-blue-700' :
+                                    connection.service_type === 'bagage' ? 'bg-orange-100 text-orange-700' :
+                                    'bg-purple-100 text-purple-700'
+                                  }`}>
+                                    {connection.service_type === 'ticket' ? '🎫 Ticket' :
+                                     connection.service_type === 'courrier' ? '📮 Courrier' :
+                                     connection.service_type === 'bagage' ? '🧳 Bagage' :
+                                     '⚙️ Autre'}
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getOperatorColor(connection.operator)}`}>
                               <div className="flex items-center space-x-1">
