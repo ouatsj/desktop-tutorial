@@ -2822,14 +2822,27 @@ const Dashboard = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Lignes de connexion</h2>
-              {gares.length > 0 && (
-                <button
-                  onClick={() => openAddModal('connection')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-                >
-                  Nouvelle ligne
-                </button>
-              )}
+              <div className="flex space-x-3">
+                {connections.length > 0 && (
+                  <button
+                    onClick={printConnectionsList}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center space-x-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    <span>Imprimer</span>
+                  </button>
+                )}
+                {gares.length > 0 && (
+                  <button
+                    onClick={() => openAddModal('connection')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                  >
+                    Nouvelle ligne
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Barre de recherche unifiée pour les connexions */}
