@@ -127,6 +127,7 @@ class Connection(BaseModel):
     operator: Operator
     operator_type: OperatorType
     connection_type: str  # ex: "Internet", "Data", "Fibre Optique"
+    service_type: ServiceType = ServiceType.AUTRE  # Type de service (ticket/courrier/bagage/autre)
     status: ConnectionStatus = ConnectionStatus.ACTIVE
     created_at: datetime = Field(default_factory=datetime.utcnow)
     description: Optional[str] = None
