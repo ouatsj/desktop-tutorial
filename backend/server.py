@@ -140,6 +140,7 @@ class ConnectionCreate(BaseModel):
     operator: Operator
     operator_type: OperatorType
     connection_type: str
+    service_type: ServiceType = ServiceType.AUTRE
     description: Optional[str] = None
 
 class Recharge(BaseModel):
