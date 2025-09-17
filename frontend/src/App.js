@@ -2286,9 +2286,239 @@ const Dashboard = () => {
     }
   };
 
-  const openReportModal = (type, entityId, entityName) => {
-    setReportConfig({ type, entityId, entityName });
-    setShowReportsModal(true);
+  const printConnectionsList = () => {
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Liste des Lignes de Connexion - ${new Date().toLocaleDateString('fr-FR')}</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            color: #000;
+            background: #fff;
+          }
+          .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-bottom: 3px solid #1f2937;
+            padding-bottom: 20px;
+          }
+          .header h1 { 
+            margin: 0; 
+            color: #1f2937; 
+            font-size: 24px;
+          }
+          .header .subtitle { 
+            color: #6b7280; 
+            margin: 5px 0;
+            font-size: 14px;
+          }
+          .summary { 
+            background: #f9fafb; 
+            padding: 15px; 
+            margin: 20px 0; 
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+          }
+          .summary h3 { 
+            margin: 0 0 10px 0; 
+            color: #374151;
+            font-size: 16px;
+          }
+          .stats { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin: 15px 0;
+          }
+          .stat-item { 
+            text-align: center; 
+            padding: 10px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+          }
+          .stat-number { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #1f2937;
+          }
+          .stat-label { 
+            font-size: 12px; 
+            color: #6b7280;
+            margin-top: 5px;
+          }
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0;
+            font-size: 12px;
+          }
+          th, td { 
+            border: 1px solid #d1d5db; 
+            padding: 8px; 
+            text-align: left;
+          }
+          th { 
+            background: #f3f4f6; 
+            font-weight: bold; 
+            color: #374151;
+          }
+          .status-active { background: #dcfce7; color: #166534; }
+          .status-inactive { background: #fef3c7; color: #92400e; }
+          .service-ticket { background: #dcfce7; color: #166534; }
+          .service-courrier { background: #dbeafe; color: #1e40af; }
+          .service-bagage { background: #fed7aa; color: #c2410c; }
+          .service-autre { background: #e9d5ff; color: #7c2d12; }
+          .operator-orange { color: #ea580c; font-weight: bold; }
+          .operator-telecel { color: #2563eb; font-weight: bold; }
+          .operator-moov { color: #16a34a; font-weight: bold; }
+          .footer { 
+            margin-top: 30px; 
+            text-align: center; 
+            font-size: 10px; 
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+          }
+          @media print {
+            body { margin: 0; }
+            .no-print { display: none !important; }
+            table { page-break-inside: avoid; }
+            th { background: #f3f4f6 !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🚂 SYSTÈME DE GESTION DES RECHARGES</h1>
+          <div class="subtitle">République du Burkina Faso</div>
+          <div class="subtitle">Liste des Lignes de Connexion Internet</div>
+          <div class="subtitle">Générée le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</div>
+        </div>
+
+        <div class="summary">
+          <h3>📊 Résumé Statistique</h3>
+          <div class="stats">
+            <div class="stat-item">
+              <div class="stat-number">${connections.length}</div>
+              <div class="stat-label">Total Connexions</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${connections.filter(c => c.status === 'active').length}</div>
+              <div class="stat-label">Actives</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${connections.filter(c => c.status === 'inactive').length}</div>
+              <div class="stat-label">Inactives</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${[...new Set(connections.map(c => c.operator))].length}</div>
+              <div class="stat-label">Opérateurs</div>
+            </div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 15%">N° Ligne</th>
+              <th style="width: 20%">Gare / Usage</th>
+              <th style="width: 15%">Opérateur</th>
+              <th style="width: 15%">Type Connexion</th>
+              <th style="width: 10%">Statut</th>
+              <th style="width: 12%">Dernière Recharge</th>
+              <th style="width: 13%">Date Expiration</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${connections.map(connection => {
+              const gare = gares.find(g => g.id === connection.gare_id);
+              const connectionRecharges = recharges.filter(r => r.connection_id === connection.id);
+              const lastRecharge = connectionRecharges.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+              
+              const serviceTypeLabel = 
+                connection.service_type === 'ticket' ? '🎫 Ticket' :
+                connection.service_type === 'courrier' ? '📮 Courrier' :
+                connection.service_type === 'bagage' ? '🧳 Bagage' :
+                '⚙️ Autre';
+              
+              const serviceTypeClass = 
+                connection.service_type === 'ticket' ? 'service-ticket' :
+                connection.service_type === 'courrier' ? 'service-courrier' :
+                connection.service_type === 'bagage' ? 'service-bagage' :
+                'service-autre';
+
+              const operatorClass = 
+                connection.operator === 'Orange' ? 'operator-orange' :
+                connection.operator === 'Telecel' ? 'operator-telecel' :
+                connection.operator === 'Moov' ? 'operator-moov' : '';
+
+              return `
+                <tr>
+                  <td><strong>${connection.line_number}</strong></td>
+                  <td>
+                    <div><strong>${gare?.name || 'Gare inconnue'}</strong></div>
+                    <div class="${serviceTypeClass}" style="font-size: 10px; padding: 2px 6px; border-radius: 12px; margin-top: 4px; display: inline-block;">
+                      ${serviceTypeLabel}
+                    </div>
+                  </td>
+                  <td class="${operatorClass}">
+                    ${connection.operator}
+                    <div style="font-size: 10px; color: #6b7280;">
+                      ${connection.operator_type === 'mobile' ? '📱 Mobile' : '🌐 Fibre'}
+                    </div>
+                  </td>
+                  <td>${connection.connection_type}</td>
+                  <td>
+                    <span class="${connection.status === 'active' ? 'status-active' : 'status-inactive'}" 
+                          style="padding: 3px 8px; border-radius: 12px; font-size: 10px;">
+                      ${connection.status === 'active' ? '✅ Active' : 
+                        connection.status === 'inactive' ? '⏸️ Inactive' : '⏹️ Suspendue'}
+                    </span>
+                  </td>
+                  <td>
+                    ${lastRecharge 
+                      ? `<div>${new Date(lastRecharge.created_at).toLocaleDateString('fr-FR')}</div>
+                         <div style="font-size: 10px; color: #6b7280;">${lastRecharge.cost?.toLocaleString()} FCFA</div>`
+                      : '<span style="color: #9ca3af;">Aucune</span>'
+                    }
+                  </td>
+                  <td>
+                    ${connection.expiry_date 
+                      ? `<div>${new Date(connection.expiry_date).toLocaleDateString('fr-FR')}</div>
+                         <div style="font-size: 10px; color: ${new Date(connection.expiry_date) < new Date() ? '#dc2626' : '#059669'};">
+                           ${new Date(connection.expiry_date) < new Date() ? '🔴 Expiré' : '🟢 Valide'}
+                         </div>`
+                      : '<span style="color: #9ca3af;">Non définie</span>'
+                    }
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <p><strong>Système de Gestion des Recharges Internet - Gares Ferroviaires du Burkina Faso</strong></p>
+          <p>Document généré automatiquement le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+          <p>Total des connexions: ${connections.length} | Actives: ${connections.filter(c => c.status === 'active').length} | 
+             Opérateurs: ${[...new Set(connections.map(c => c.operator))].join(', ')}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
   };
 
   const getStatusBadge = (status) => {
