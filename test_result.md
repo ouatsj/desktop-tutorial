@@ -352,6 +352,18 @@ frontend:
         agent: "testing"
         comment: "Code review confirms that the gare names are now correctly displayed in the connection selection when creating a new recharge. The RechargeForm component properly looks up the gare name from the gares array using the connection's gare_id (lines 1282-1286). The connection options are prepared with the actual gare names in the format '[Line Number] - [Real Gare Name] - [Operator] ([Connection Type])' (line 1293). The SearchableSelect component also supports searching by gare name (lines 35-41). The selected connection details also display the correct gare name (lines 1374-1376). This implementation ensures that connections now show actual gare names instead of 'Gare inconnue'."
 
+  - task: "Login Functionality - Invalid Credentials Fix"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "CRITICAL LOGIN TEST COMPLETED: Verified that the 'Invalid credentials' issue has been resolved. ✅ First account (admin@admin.com / 123456) - LOGIN SUCCESSFUL: User successfully authenticated, redirected to dashboard, user name 'Admin Simple' displayed in header, all French navigation elements present and functional. ✅ Second account (admin@rail.bf / admin123) - LOGIN SUCCESSFUL: User successfully authenticated, redirected to dashboard, user name 'Admin Burkina Rail' displayed in header, all navigation elements present. ✅ NO 'Invalid credentials' errors found during testing with either account. ✅ French interface working correctly. ✅ Mobile responsiveness verified. The login functionality is working correctly and the authentication issue has been RESOLVED."
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
