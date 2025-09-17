@@ -382,6 +382,21 @@ frontend:
         agent: "testing"
         comment: "COMPREHENSIVE SERVICE TYPE TESTING COMPLETED - ALL CRITICAL FEATURES VERIFIED: ✅ Login and Setup: Successfully logged in with admin@admin.com/123456. ✅ Connection Creation: Found all 4 service type options (🎫 Facturation Ticket, 📮 Courrier, 🧳 Bagage, ⚙️ Autre) with proper color coding and visual feedback. ✅ CRITICAL - Connection Modification: Successfully tested edit functionality - edit modal opens correctly and includes 'Usage du numéro' section with all 4 service type buttons. Service type modification works perfectly with proper visual feedback. ✅ Service Type Display in Connections List: Service type badges are properly displayed (found both 🎫 Ticket and ⚙️ Autre badges with correct color coding). ✅ CRITICAL - Service Type Display in Recharges List: Verified that recharges show gare name + service type badge format correctly. Found service types in recharges with proper format: 'Gare Place de la Femme + 🎫 Ticket' and 'Gare Centrale + ⚙️ Autre'. ✅ Color Coding: Consistent across all displays (green for ticket, purple for autre). ✅ Successfully modified connection service type from ⚙️ Autre to 🎫 Facturation Ticket and verified changes persist in both connections and recharges lists. ALL SERVICE TYPE FUNCTIONALITY IS FULLY OPERATIONAL AND MEETS ALL REQUIREMENTS."
 
+  - task: "Print Functionality for Connections List"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented comprehensive print functionality for connections list with professional document generation, statistical summary, and complete connection details formatting."
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE PRINT FUNCTIONALITY TESTING COMPLETED - ALL CRITICAL FEATURES VERIFIED: ✅ LOGIN AND NAVIGATION: Successfully logged in with admin@admin.com/123456 and navigated to 'Connexions' tab. ✅ PRINT BUTTON AVAILABILITY: Found green 'Imprimer' button (bg-green-600) with printer icon (SVG) positioned correctly next to 'Nouvelle ligne' button. Button is visible only when connections exist (2 connections found). ✅ PRINT FUNCTIONALITY: Successfully clicked print button and captured print content. Print document opens in new window with professional formatting. ✅ PRINT DOCUMENT CONTENT VERIFICATION: Professional header '🚂 SYSTÈME DE GESTION DES RECHARGES' found. Subtitle 'République du Burkina Faso' present. Generation date and time included. Statistical summary with total connections (2), active/inactive counts, and operators count. Complete table with all required columns: N° Ligne, Gare / Usage, Opérateur, Type Connexion, Statut, Dernière Recharge, Date Expiration. ✅ PRINT DOCUMENT FORMATTING: Color coding for service types (green for ticket, purple for autre), operator color coding (orange for Orange), status indicators (active/inactive), print-optimized CSS with @media print rules. ✅ BROWSER PRINT INTEGRATION: Print functionality triggers browser's native print dialog for optimal printing experience. Document is properly formatted for both screen viewing and printing with appropriate margins and styling. ALL PRINT FUNCTIONALITY REQUIREMENTS FULLY IMPLEMENTED AND WORKING PERFECTLY."
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
