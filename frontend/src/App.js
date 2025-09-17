@@ -2286,6 +2286,11 @@ const Dashboard = () => {
     }
   };
 
+  const openReportModal = (type, entityId, entityName) => {
+    setReportConfig({ type, entityId, entityName });
+    setShowReportsModal(true);
+  };
+
   const printConnectionsList = () => {
     const printContent = `
       <!DOCTYPE html>
